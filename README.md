@@ -58,7 +58,7 @@ The Compact contract uses `disclose()` intentionally only for values that requir
 
 The application extends the official Midnight Full dApp workspace while preserving all standard build and test scripts:
 
-- **Contract (`contract/`)**: Written in Compact (`0.23`), compiled via `compact compile`. Generates circuits, ZKIR, and proving keys.
+- **Contract (`contract/`)**: Written in Compact (`0.23` / `0.31`), compiled via `compact compile`. Generates circuits, ZKIR, and proving keys.
 - **API (`api/`)**: TypeScript wrapper providing state observables (`state$`) and circuit invocation bindings (`registerDataset`, `requestAccess`, `grantPermission`, `submitAccessProof`, `revokeAccess`).
 - **CLI (`bboard-cli/`)**: Terminal interface supporting standalone local development nodes and remote network setups.
 - **UI (`bboard-ui/`)**: Full-stack React 19 / MUI dashboard featuring Lace Wallet integration, Hospital & Researcher views, Dataset Registry, Anonymous Patient Record Explorer, Selective Disclosure Visualizer, Audit Log, and Research Analytics.
@@ -132,7 +132,15 @@ npm run setup -- --network preprod
 - **Contract Compilation**: ✅ Contract compiles cleanly with 5 ZK circuits using `compact compile`.
 - **Local Standalone Deployment**: ✅ Works locally via standalone local node testkit.
 - **Faucet Funding**: ✅ Faucet tokens successfully requested for preprod unshielded wallet address (`mn_addr_preprod...`).
-- **Preprod Wallet Sync**: Documented blocker — if wallet sync hangs on remote preprod indexer, the workspace retains state in `.midnight-state.json` without deleting funded keys.
+- **Preprod Wallet Sync Status**: If remote indexer wallet sync blocks or experiences network latency, deployment status is documented as blocked per mentor guidance.
+
+### Mentor Deployment Guidance & Switching Instructions
+- **Mentor Guidance**: *"If you're unable to deploy, just build the full-stack dApp and submit it. Skip the deployment part for now. Vibe-code the full-stack dApp using the prompt, then submit."*
+- **Preprod Switching Instructions**:
+  1. When remote indexer sync is complete, run `npm run setup -- --network preprod` in `bboard-cli/`.
+  2. Copy the resulting contract address from `bboard-cli/dist/deployment.json`.
+  3. Set `VITE_NETWORK=preprod` and `VITE_CONTRACT_ADDRESS=<deployed_address>` in `bboard-ui/.env`.
+  4. Run `npm run dev` in `bboard-ui/`.
 
 ---
 
