@@ -239,14 +239,15 @@ export class BrowserDeployedBoardManager implements DeployedBoardAPIProvider {
 
   private async deployDeployment(deployment: BehaviorSubject<BoardDeployment>): Promise<void> {
     try {
-      // In fallback/undeployed mode — skip proof server, return instant mock
+      // Await provider initialization first — this is where _isFallbackMode gets set
+      await this.getProviders();
+      // Now check: on undeployed network or missing wallet, use instant mock
       if (_isFallbackMode) {
         const mockAddr = toHex(new Uint8Array(32).fill(0xab)) as ContractAddress;
         deployment.next({ status: 'deployed', api: new MockBBoardAPI(mockAddr) });
         return;
       }
       const providers = await this.getProviders();
-      // 25s timeout guard — prevents infinite hang if proof server is unreachable
       const api = await Promise.race([
         BBoardAPI.deploy(providers, this.logger),
         new Promise<never>((_, reject) =>
@@ -267,7 +268,8 @@ export class BrowserDeployedBoardManager implements DeployedBoardAPIProvider {
     contractAddress: ContractAddress,
   ): Promise<void> {
     try {
-      // In fallback/undeployed mode — instant mock join
+      // Await provider initialization first — this is where _isFallbackMode gets set
+      await this.getProviders();
       if (_isFallbackMode) {
         deployment.next({ status: 'deployed', api: new MockBBoardAPI(contractAddress) });
         return;
