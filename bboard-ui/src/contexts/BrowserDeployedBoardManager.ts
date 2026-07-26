@@ -51,7 +51,7 @@ import {
 } from '@midnight-ntwrk/midnight-js-protocol/ledger';
 import { BBoardPrivateState } from '@midnight-ntwrk/bboard-contract';
 import { inMemoryPrivateStateProvider } from '../in-memory-private-state-provider';
-import { NetworkId } from '@midnight-ntwrk/midnight-js-network-id';
+import { setNetworkId, NetworkId } from '@midnight-ntwrk/midnight-js-network-id';
 import type { UnboundTransaction } from '@midnight-ntwrk/midnight-js-types';
 
 /**
@@ -218,7 +218,10 @@ export class BrowserDeployedBoardManager implements DeployedBoardAPIProvider {
 
 /** @internal */
 const initializeProviders = async (logger: Logger): Promise<BBoardProviders> => {
-  const networkId = (import.meta.env.VITE_NETWORK_ID as NetworkId) || 'undeployed';
+  const envNetwork = (import.meta.env.VITE_NETWORK_ID || import.meta.env.VITE_NETWORK || 'undeployed').toLowerCase();
+  const networkId = (envNetwork === 'preprod' ? 'preprod' : 'undeployed') as NetworkId;
+  setNetworkId(networkId);
+
   const zkConfigPath = window.location.origin; // '../../../contract/src/managed/bboard';
   const keyMaterialProvider = new FetchZkConfigProvider<BBoardCircuitKeys>(zkConfigPath, fetch.bind(window));
   const inMemoryBBoardPrivateStateProvider = inMemoryPrivateStateProvider<string, BBoardPrivateState>();
