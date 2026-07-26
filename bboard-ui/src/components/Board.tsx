@@ -103,8 +103,24 @@ export const Board: React.FC<BoardProps> = ({ boardDeployment$, activeTab = 'das
       setErrorMessage(undefined);
       const datasetId = new Uint8Array(32);
       datasetId.fill(1);
+      const parseTo32Bytes = (input: string): Uint8Array => {
+        const cleaned = input.trim().replace(/^0x/i, '');
+        if (!cleaned) return new Uint8Array(32);
+        if (/^[0-9a-fA-F]+$/.test(cleaned)) {
+          const hex = cleaned.length % 2 !== 0 ? '0' + cleaned : cleaned;
+          const bytes = Buffer.from(hex, 'hex');
+          const res = new Uint8Array(32);
+          res.set(bytes.subarray(0, 32));
+          return res;
+        }
+        const textBytes = new TextEncoder().encode(cleaned);
+        const res = new Uint8Array(32);
+        res.set(textBytes.subarray(0, 32));
+        return res;
+      };
+
       const researcherPk = researcherPkInput.trim()
-        ? Buffer.from(researcherPkInput.trim(), 'hex')
+        ? parseTo32Bytes(researcherPkInput)
         : (boardState?.activeResearcherPk ?? new Uint8Array(32));
       await deployedBoardAPI.grantPermission(datasetId, researcherPk);
       setStatusMessage('Research access permission granted to researcher.');
@@ -122,8 +138,23 @@ export const Board: React.FC<BoardProps> = ({ boardDeployment$, activeTab = 'das
       setErrorMessage(undefined);
       const datasetId = new Uint8Array(32);
       datasetId.fill(1);
+      const parseTo32Bytes = (input: string): Uint8Array => {
+        const cleaned = input.trim().replace(/^0x/i, '');
+        if (!cleaned) return new Uint8Array(32);
+        if (/^[0-9a-fA-F]+$/.test(cleaned)) {
+          const hex = cleaned.length % 2 !== 0 ? '0' + cleaned : cleaned;
+          const bytes = Buffer.from(hex, 'hex');
+          const res = new Uint8Array(32);
+          res.set(bytes.subarray(0, 32));
+          return res;
+        }
+        const textBytes = new TextEncoder().encode(cleaned);
+        const res = new Uint8Array(32);
+        res.set(textBytes.subarray(0, 32));
+        return res;
+      };
       const patientHash = patientHashInput.trim()
-        ? Buffer.from(patientHashInput.trim(), 'hex')
+        ? parseTo32Bytes(patientHashInput)
         : new Uint8Array(32);
       await deployedBoardAPI.submitAccessProof(datasetId, patientHash);
       setStatusMessage('Dataset ZK access proof submitted. Audit log updated.');
