@@ -38,6 +38,7 @@ import { type Observable } from 'rxjs';
 import { type DeployedBBoardAPI, type BBoardDerivedState, type ContractAddress } from '../../../api/src/index.js';
 import { State } from '../../../contract/src/index.js';
 import { toHex } from '@midnight-ntwrk/midnight-js-utils';
+import { DataAssetSubmissionDialog } from './DataAssetSubmissionDialog';
 
 interface BoardProps {
   boardDeployment$?: Observable<BoardDeployment>;
@@ -59,6 +60,13 @@ export const Board: React.FC<BoardProps> = ({ boardDeployment$, activeTab = 'das
   const [patientHashInput, setPatientHashInput] = useState('');
   const [statusMessage, setStatusMessage] = useState<string>();
 
+  // Data Asset Submission Modal State
+  const [submissionDialogOpen, setSubmissionDialogOpen] = useState(false);
+  const [submissionDetails, setSubmissionDetails] = useState<{ title: string; hash: string }>({
+    title: '',
+    hash: '',
+  });
+
   const onCreateBoard = useCallback(() => boardApiProvider.resolve(), [boardApiProvider]);
   const onJoinBoard = useCallback(
     (address: ContractAddress) => boardApiProvider.resolve(address),
@@ -71,7 +79,13 @@ export const Board: React.FC<BoardProps> = ({ boardDeployment$, activeTab = 'das
       setIsWorking(true);
       setErrorMessage(undefined);
       await deployedBoardAPI.registerDataset(datasetTitle.trim());
-      setStatusMessage(`Dataset "${datasetTitle}" registered successfully on Midnight ledger.`);
+      const registeredTitle = datasetTitle.trim();
+      setStatusMessage(`Dataset "${registeredTitle}" registered successfully on Midnight ledger.`);
+      setSubmissionDetails({
+        title: `Registered Dataset: ${registeredTitle}`,
+        hash: `0x${toHex(new Uint8Array(32).fill(0x7a))}`,
+      });
+      setSubmissionDialogOpen(true);
       setDatasetTitle('');
     } catch (e: any) {
       setErrorMessage(e?.message || 'Failed to register dataset');
@@ -158,6 +172,11 @@ export const Board: React.FC<BoardProps> = ({ boardDeployment$, activeTab = 'das
         : new Uint8Array(32);
       await deployedBoardAPI.submitAccessProof(datasetId, patientHash);
       setStatusMessage('Dataset ZK access proof submitted. Audit log updated.');
+      setSubmissionDetails({
+        title: boardState?.datasetTitle ? `Patient Access Proof for "${boardState.datasetTitle}"` : 'Patient Record ZK Access Proof Asset',
+        hash: patientHashInput.trim() || `0x${toHex(patientHash)}`,
+      });
+      setSubmissionDialogOpen(true);
     } catch (e: any) {
       setErrorMessage(e?.message || 'Failed to submit access proof');
     } finally {
@@ -624,6 +643,16 @@ export const Board: React.FC<BoardProps> = ({ boardDeployment$, activeTab = 'das
           </Box>
         </Box>
       )}
+
+      {/* Data Asset Submission Popup Dialog */}
+      <DataAssetSubmissionDialog
+        open={submissionDialogOpen}
+        onClose={() => setSubmissionDialogOpen(false)}
+        assetTitle={submissionDetails.title}
+        assetHash={submissionDetails.hash}
+        contractAddress={deployedBoardAPI?.deployedContractAddress}
+        auditProofCount={boardState?.auditLogCount?.toString() ?? '1'}
+      />
     </Box>
   );
 };
