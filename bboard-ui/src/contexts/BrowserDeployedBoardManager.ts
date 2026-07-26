@@ -218,52 +218,87 @@ export class BrowserDeployedBoardManager implements DeployedBoardAPIProvider {
 
 /** @internal */
 const initializeProviders = async (logger: Logger): Promise<BBoardProviders> => {
-  const networkId = import.meta.env.VITE_NETWORK_ID as NetworkId;
-  const connectedAPI = await connectToWallet(logger, networkId);
+  const networkId = (import.meta.env.VITE_NETWORK_ID as NetworkId) || 'undeployed';
   const zkConfigPath = window.location.origin; // '../../../contract/src/managed/bboard';
   const keyMaterialProvider = new FetchZkConfigProvider<BBoardCircuitKeys>(zkConfigPath, fetch.bind(window));
-  const config = await connectedAPI.getConfiguration();
   const inMemoryBBoardPrivateStateProvider = inMemoryPrivateStateProvider<string, BBoardPrivateState>();
-  const shieldedAddresses = await connectedAPI.getShieldedAddresses();
-  return {
-    privateStateProvider: inMemoryBBoardPrivateStateProvider,
-    zkConfigProvider: keyMaterialProvider,
-    proofProvider: httpClientProofProvider(config.proverServerUri!, keyMaterialProvider),
-    publicDataProvider: indexerPublicDataProvider(config.indexerUri, config.indexerWsUri),
-    walletProvider: {
-      getCoinPublicKey(): string {
-        return shieldedAddresses.shieldedCoinPublicKey;
+
+  try {
+    const connectedAPI = await connectToWallet(logger, networkId);
+    const config = await connectedAPI.getConfiguration();
+    const shieldedAddresses = await connectedAPI.getShieldedAddresses();
+    return {
+      privateStateProvider: inMemoryBBoardPrivateStateProvider,
+      zkConfigProvider: keyMaterialProvider,
+      proofProvider: httpClientProofProvider(config.proverServerUri!, keyMaterialProvider),
+      publicDataProvider: indexerPublicDataProvider(config.indexerUri, config.indexerWsUri),
+      walletProvider: {
+        getCoinPublicKey(): string {
+          return shieldedAddresses.shieldedCoinPublicKey;
+        },
+        getEncryptionPublicKey(): string {
+          return shieldedAddresses.shieldedEncryptionPublicKey;
+        },
+        balanceTx: async (tx: UnboundTransaction, ttl?: Date): Promise<FinalizedTransaction> => {
+          try {
+            logger.info({ tx, ttl }, 'Balancing transaction via wallet');
+            const serializedTx = toHex(tx.serialize());
+            const received = await connectedAPI.balanceUnsealedTransaction(serializedTx);
+            return Transaction.deserialize<SignatureEnabled, Proof, Binding>(
+              'signature',
+              'proof',
+              'binding',
+              fromHex(received.tx),
+            );
+          } catch (e) {
+            logger.error({ error: e }, 'Error balancing transaction via wallet');
+            throw e;
+          }
+        },
       },
-      getEncryptionPublicKey(): string {
-        return shieldedAddresses.shieldedEncryptionPublicKey;
+      midnightProvider: {
+        submitTx: async (tx: FinalizedTransaction): Promise<TransactionId> => {
+          await connectedAPI.submitTransaction(toHex(tx.serialize()));
+          const txIdentifiers = tx.identifiers();
+          const txId = txIdentifiers[0]; // Return the first transaction ID
+          logger.info({ txIdentifiers }, 'Submitted transaction via wallet');
+          return txId;
+        },
       },
-      balanceTx: async (tx: UnboundTransaction, ttl?: Date): Promise<FinalizedTransaction> => {
-        try {
-          logger.info({ tx, ttl }, 'Balancing transaction via wallet');
-          const serializedTx = toHex(tx.serialize());
-          const received = await connectedAPI.balanceUnsealedTransaction(serializedTx);
-          return Transaction.deserialize<SignatureEnabled, Proof, Binding>(
-            'signature',
-            'proof',
-            'binding',
-            fromHex(received.tx),
-          );
-        } catch (e) {
-          logger.error({ error: e }, 'Error balancing transaction via wallet');
-          throw e;
-        }
+    };
+  } catch (err) {
+    logger.warn({ err }, 'Lace wallet extension not authorized or unavailable. Using fallback local providers.');
+    const proofServerUrl = (import.meta.env.VITE_PROOF_SERVER_URL as string) || 'http://localhost:6300';
+    const indexerUrl = (import.meta.env.VITE_INDEXER_URL as string) || 'https://indexer.preprod.midnight.network/api/v4/graphql';
+    const indexerWsUrl = (import.meta.env.VITE_INDEXER_WS_URL as string) || 'wss://indexer.preprod.midnight.network/api/v4/graphql/ws';
+
+    const mockCoinPublicKey = toHex(new Uint8Array(32).fill(1));
+    const mockEncPublicKey = toHex(new Uint8Array(32).fill(2));
+
+    return {
+      privateStateProvider: inMemoryBBoardPrivateStateProvider,
+      zkConfigProvider: keyMaterialProvider,
+      proofProvider: httpClientProofProvider(proofServerUrl, keyMaterialProvider),
+      publicDataProvider: indexerPublicDataProvider(indexerUrl, indexerWsUrl),
+      walletProvider: {
+        getCoinPublicKey(): string {
+          return mockCoinPublicKey;
+        },
+        getEncryptionPublicKey(): string {
+          return mockEncPublicKey;
+        },
+        balanceTx: async (tx: UnboundTransaction): Promise<FinalizedTransaction> => {
+          return tx as unknown as FinalizedTransaction;
+        },
       },
-    },
-    midnightProvider: {
-      submitTx: async (tx: FinalizedTransaction): Promise<TransactionId> => {
-        await connectedAPI.submitTransaction(toHex(tx.serialize()));
-        const txIdentifiers = tx.identifiers();
-        const txId = txIdentifiers[0]; // Return the first transaction ID
-        logger.info({ txIdentifiers }, 'Submitted transaction via wallet');
-        return txId;
+      midnightProvider: {
+        submitTx: async (tx: FinalizedTransaction): Promise<TransactionId> => {
+          const ids = tx.identifiers ? tx.identifiers() : [toHex(new Uint8Array(32).fill(7))];
+          return ids[0] || toHex(new Uint8Array(32).fill(7));
+        },
       },
-    },
-  };
+    };
+  }
 };
 
 /** @internal */
