@@ -1,34 +1,37 @@
-// Private Medical Research Data Exchange MUI Theme Config
+// Private Medical Research Data Exchange MUI Theme Config (Premium Light SaaS Aesthetic)
 
-import { createTheme, alpha } from '@mui/material';
+import { createTheme } from '@mui/material';
 
 export const theme = createTheme({
   typography: {
-    fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+    fontFamily: '"Inter", "Outfit", "Roboto", "Helvetica", "Arial", sans-serif',
     allVariants: {
-      color: '#F9FAFB',
+      color: '#1F2937',
     },
   },
   palette: {
-    mode: 'dark',
+    mode: 'light',
     primary: {
-      main: '#00E5FF',
-      light: '#67E8F9',
-      dark: '#0284C7',
+      main: '#F97316',
+      light: '#FFEDD5',
+      dark: '#EA580C',
+      contrastText: '#FFFFFF',
     },
     secondary: {
       main: '#10B981',
-      light: '#34D399',
+      light: '#D1FAE5',
       dark: '#059669',
+      contrastText: '#FFFFFF',
     },
     background: {
-      default: '#090D16',
-      paper: '#111827',
+      default: '#FAFAFA',
+      paper: '#FFFFFF',
     },
     text: {
-      primary: '#F9FAFB',
-      secondary: '#9CA3AF',
+      primary: '#1F2937',
+      secondary: '#6B7280',
     },
+    divider: '#E5E7EB',
   },
   components: {
     MuiButton: {
@@ -37,6 +40,10 @@ export const theme = createTheme({
           borderRadius: 8,
           textTransform: 'none',
           fontWeight: 600,
+          boxShadow: 'none',
+          '&:hover': {
+            boxShadow: '0 4px 12px rgba(249, 115, 22, 0.2)',
+          },
         },
       },
     },
@@ -44,9 +51,36 @@ export const theme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: 16,
-          backgroundColor: alpha('#111827', 0.85),
-          backdropFilter: 'blur(12px)',
-          border: '1px solid rgba(255, 255, 255, 0.08)',
+          backgroundColor: '#FFFFFF',
+          border: '1px solid #E5E7EB',
+          boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03)',
+        },
+      },
+    },
+    MuiTextField: {
+      styleOverrides: {
+        root: {
+          '& .MuiOutlinedInput-root': {
+            borderRadius: 8,
+            backgroundColor: '#FFFFFF',
+            '& fieldset': {
+              borderColor: '#E5E7EB',
+            },
+            '&:hover fieldset': {
+              borderColor: '#F97316',
+            },
+            '&.Mui-focused fieldset': {
+              borderColor: '#F97316',
+            },
+          },
+        },
+      },
+    },
+    MuiChip: {
+      styleOverrides: {
+        root: {
+          borderRadius: 8,
+          fontWeight: 600,
         },
       },
     },

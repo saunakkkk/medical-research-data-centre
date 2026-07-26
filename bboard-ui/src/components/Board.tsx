@@ -1,4 +1,4 @@
-// Private Medical Research Data Exchange Interactive dApp Component
+// Private Medical Research Data Exchange Interactive dApp Component (Premium Light SaaS Aesthetic)
 
 import React, { useCallback, useEffect, useState } from 'react';
 import {
@@ -171,27 +171,29 @@ export const Board: React.FC<BoardProps> = ({ boardDeployment$, activeTab = 'das
 
   if (!boardDeployment$) {
     return (
-      <Card sx={{ p: 4, textAlign: 'center', background: 'rgba(17, 24, 39, 0.95)', border: '1px solid rgba(0,229,255,0.2)' }}>
-        <SecurityIcon sx={{ fontSize: 64, color: '#00E5FF', mb: 2 }} />
-        <Typography variant="h5" sx={{ fontWeight: 800, mb: 1, color: '#F9FAFB' }}>
+      <Card sx={{ p: 5, textAlign: 'center', backgroundColor: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: 4, boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
+        <SecurityIcon sx={{ fontSize: 64, color: '#F97316', mb: 2 }} />
+        <Typography variant="h4" sx={{ fontWeight: 800, mb: 1, color: '#EA580C', letterSpacing: '-0.02em' }}>
           Initialize Medical Data Exchange Contract
         </Typography>
-        <Typography variant="body2" sx={{ color: '#9CA3AF', mb: 4, maxWidth: 500, mx: 'auto' }}>
-          Deploy a new smart contract for secure patient dataset sharing or join an existing contract using its on-chain address.
+        <Typography variant="body1" sx={{ color: '#6B7280', mb: 4, maxWidth: 540, mx: 'auto', lineHeight: 1.6 }}>
+          Deploy a new zero-knowledge smart contract for secure patient dataset sharing or join an existing contract using its on-chain address.
         </Typography>
 
-        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, justifyContent: 'center', maxWidth: 600, mx: 'auto' }}>
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, justifyContent: 'center', maxWidth: 640, mx: 'auto' }}>
           <Button
             variant="contained"
             size="large"
             onClick={onCreateBoard}
             startIcon={<AddCircleIcon />}
             sx={{
-              background: 'linear-gradient(135deg, #00E5FF 0%, #0284C7 100%)',
-              color: '#090D16',
+              backgroundColor: '#F97316',
+              color: '#FFFFFF',
               fontWeight: 700,
-              py: 1.5,
-              px: 3,
+              py: 1.6,
+              px: 3.5,
+              borderRadius: 2.5,
+              '&:hover': { backgroundColor: '#EA580C' },
             }}
           >
             Deploy New Contract
@@ -204,13 +206,12 @@ export const Board: React.FC<BoardProps> = ({ boardDeployment$, activeTab = 'das
               value={joinAddressInput}
               onChange={(e) => setJoinAddressInput(e.target.value)}
               fullWidth
-              sx={{ input: { color: 'white' } }}
             />
             <Button
               variant="outlined"
               onClick={() => onJoinBoard(joinAddressInput.trim())}
               disabled={!joinAddressInput.trim()}
-              sx={{ borderColor: '#00E5FF', color: '#00E5FF' }}
+              sx={{ borderColor: '#F97316', color: '#EA580C', fontWeight: 700, borderRadius: 2.5, px: 3 }}
             >
               Join
             </Button>
@@ -225,71 +226,76 @@ export const Board: React.FC<BoardProps> = ({ boardDeployment$, activeTab = 'das
   return (
     <Box sx={{ width: '100%' }}>
       {/* Working & Error Overlay */}
-      <Backdrop open={isWorking} sx={{ color: '#00E5FF', zIndex: 999 }}>
-        <CircularProgress color="inherit" />
-        <Typography sx={{ ml: 2, fontWeight: 700, color: 'white' }}>Executing Midnight ZK Proof Circuit...</Typography>
+      <Backdrop open={isWorking} sx={{ color: '#F97316', zIndex: 999, backgroundColor: 'rgba(255, 255, 255, 0.85)', backdropFilter: 'blur(4px)' }}>
+        <CircularProgress color="inherit" size={48} />
+        <Typography sx={{ ml: 2.5, fontWeight: 700, color: '#1F2937', fontSize: '1.1rem' }}>Executing Midnight ZK Proof Circuit...</Typography>
       </Backdrop>
 
       {errorMessage && (
-        <Alert severity="error" onClose={() => setErrorMessage(undefined)} sx={{ mb: 3 }}>
+        <Alert severity="error" onClose={() => setErrorMessage(undefined)} sx={{ mb: 3, borderRadius: 2.5 }}>
           {errorMessage}
         </Alert>
       )}
 
       {statusMessage && (
-        <Alert severity="success" onClose={() => setStatusMessage(undefined)} sx={{ mb: 3 }}>
+        <Alert severity="success" onClose={() => setStatusMessage(undefined)} sx={{ mb: 3, borderRadius: 2.5 }}>
           {statusMessage}
         </Alert>
       )}
 
-      {/* Contract Banner */}
-      <Paper sx={{ p: 2.5, mb: 3, background: 'rgba(17, 24, 39, 0.7)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 3 }}>
+      {/* Contract Address & Status Banner */}
+      <Paper sx={{ p: 2.5, mb: 3.5, backgroundColor: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: 3, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
         <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, alignItems: 'center', justifyContent: 'space-between', gap: 2 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <SecurityIcon sx={{ color: '#10B981' }} />
-            <Typography variant="subtitle1" sx={{ fontWeight: 700, color: 'white' }}>
+            <SecurityIcon sx={{ color: '#F97316' }} />
+            <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#1F2937' }}>
               Contract Address:
             </Typography>
             <Chip
               label={deployedBoardAPI?.deployedContractAddress ? `${deployedBoardAPI.deployedContractAddress.slice(0, 16)}...${deployedBoardAPI.deployedContractAddress.slice(-8)}` : 'Loading...'}
               size="small"
-              sx={{ backgroundColor: 'rgba(0,229,255,0.1)', color: '#00E5FF', fontFamily: 'monospace' }}
+              sx={{ backgroundColor: '#FFF7ED', color: '#EA580C', border: '1px solid #FFEDD5', fontFamily: 'monospace', fontWeight: 700 }}
             />
             <IconButton
               size="small"
               onClick={() => deployedBoardAPI?.deployedContractAddress && navigator.clipboard.writeText(deployedBoardAPI.deployedContractAddress)}
             >
-              <CopyIcon fontSize="small" sx={{ color: '#9CA3AF' }} />
+              <CopyIcon fontSize="small" sx={{ color: '#6B7280' }} />
             </IconButton>
           </Box>
 
-          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+          <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
             <Chip
-              icon={<LockIcon sx={{ fontSize: '14px !important', color: '#10B981' }} />}
+              icon={<LockIcon sx={{ fontSize: '14px !important', color: boardState?.state === State.GRANTED ? '#10B981' : '#F97316' }} />}
               label={`Permission: ${accessStateLabel}`}
-              color={boardState?.state === State.GRANTED ? 'success' : 'default'}
+              sx={{
+                backgroundColor: boardState?.state === State.GRANTED ? '#ECFDF5' : '#FFF7ED',
+                color: boardState?.state === State.GRANTED ? '#059669' : '#EA580C',
+                border: boardState?.state === State.GRANTED ? '1px solid #A7F3D0' : '1px solid #FFEDD5',
+                fontWeight: 700,
+              }}
               size="small"
             />
             <Chip
-              icon={<HistoryIcon sx={{ fontSize: '14px !important' }} />}
+              icon={<HistoryIcon sx={{ fontSize: '14px !important', color: '#F97316' }} />}
               label={`Audit Proofs: ${boardState?.auditLogCount?.toString() ?? '0'}`}
               size="small"
-              sx={{ backgroundColor: 'rgba(255,255,255,0.05)', color: '#F9FAFB' }}
+              sx={{ backgroundColor: '#F3F4F6', color: '#374151', border: '1px solid #E5E7EB', fontWeight: 600 }}
             />
           </Box>
         </Box>
       </Paper>
 
-      {/* Main Tab Views */}
+      {/* Main Dashboard Views */}
       {activeTab === 'dashboard' && (
-        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3 }}>
-          {/* Register Dataset Panel */}
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3.5 }}>
+          {/* Hospital Dataset Registration */}
           <Box sx={{ flex: 1 }}>
-            <Card sx={{ p: 3, height: '100%' }}>
-              <Typography variant="h6" sx={{ fontWeight: 700, mb: 1, color: '#00E5FF', display: 'flex', alignItems: 'center', gap: 1 }}>
-                <AddCircleIcon /> Hospital Dataset Registration
+            <Card sx={{ p: 3.5, height: '100%' }}>
+              <Typography variant="h6" sx={{ fontWeight: 800, mb: 1, color: '#EA580C', display: 'flex', alignItems: 'center', gap: 1 }}>
+                <AddCircleIcon sx={{ color: '#F97316' }} /> Hospital Dataset Registration
               </Typography>
-              <Typography variant="body2" sx={{ color: '#9CA3AF', mb: 3 }}>
+              <Typography variant="body2" sx={{ color: '#6B7280', mb: 3, lineHeight: 1.6 }}>
                 Hospitals securely post anonymized medical research dataset titles to the Midnight public ledger.
               </Typography>
 
@@ -299,7 +305,7 @@ export const Board: React.FC<BoardProps> = ({ boardDeployment$, activeTab = 'das
                 placeholder="e.g. Oncology Genomic Sequencing Cohort 2026"
                 value={datasetTitle}
                 onChange={(e) => setDatasetTitle(e.target.value)}
-                sx={{ mb: 2 }}
+                sx={{ mb: 2.5 }}
               />
 
               <Button
@@ -307,20 +313,20 @@ export const Board: React.FC<BoardProps> = ({ boardDeployment$, activeTab = 'das
                 fullWidth
                 onClick={onRegisterDataset}
                 disabled={!datasetTitle.trim()}
-                sx={{ background: 'linear-gradient(135deg, #00E5FF 0%, #0284C7 100%)', color: '#090D16', py: 1.2, fontWeight: 700 }}
+                sx={{ backgroundColor: '#F97316', color: '#FFFFFF', py: 1.4, fontWeight: 700, borderRadius: 2.5, '&:hover': { backgroundColor: '#EA580C' } }}
               >
                 Register Medical Dataset Circuit
               </Button>
             </Card>
           </Box>
 
-          {/* Hospital Admin Actions */}
+          {/* Hospital Access Control */}
           <Box sx={{ flex: 1 }}>
-            <Card sx={{ p: 3, height: '100%' }}>
-              <Typography variant="h6" sx={{ fontWeight: 700, mb: 1, color: '#10B981', display: 'flex', alignItems: 'center', gap: 1 }}>
-                <VerifiedIcon /> Hospital Access Control
+            <Card sx={{ p: 3.5, height: '100%' }}>
+              <Typography variant="h6" sx={{ fontWeight: 800, mb: 1, color: '#EA580C', display: 'flex', alignItems: 'center', gap: 1 }}>
+                <VerifiedIcon sx={{ color: '#F97316' }} /> Hospital Access Control
               </Typography>
-              <Typography variant="body2" sx={{ color: '#9CA3AF', mb: 3 }}>
+              <Typography variant="body2" sx={{ color: '#6B7280', mb: 3, lineHeight: 1.6 }}>
                 Grant or revoke research institution dataset permissions based on verified ZK qualification proofs.
               </Typography>
 
@@ -331,7 +337,7 @@ export const Board: React.FC<BoardProps> = ({ boardDeployment$, activeTab = 'das
                 placeholder="Optional override hex..."
                 value={researcherPkInput}
                 onChange={(e) => setResearcherPkInput(e.target.value)}
-                sx={{ mb: 2 }}
+                sx={{ mb: 2.5 }}
               />
 
               <Box sx={{ display: 'flex', gap: 2 }}>
@@ -342,7 +348,7 @@ export const Board: React.FC<BoardProps> = ({ boardDeployment$, activeTab = 'das
                   color="success"
                   disabled={boardState?.state !== State.REQUESTED}
                   startIcon={<CheckCircleIcon />}
-                  sx={{ py: 1.2, fontWeight: 700 }}
+                  sx={{ py: 1.3, fontWeight: 700, borderRadius: 2.5 }}
                 >
                   Grant Permission
                 </Button>
@@ -353,9 +359,9 @@ export const Board: React.FC<BoardProps> = ({ boardDeployment$, activeTab = 'das
                   color="error"
                   disabled={boardState?.state === State.NONE || boardState?.state === State.REVOKED}
                   startIcon={<CancelIcon />}
-                  sx={{ py: 1.2, fontWeight: 700 }}
+                  sx={{ py: 1.3, fontWeight: 700, borderRadius: 2.5, borderColor: '#EF4444', color: '#DC2626' }}
                 >
-                  Revoke Permission
+                  Revoke Access
                 </Button>
               </Box>
             </Card>
@@ -364,18 +370,18 @@ export const Board: React.FC<BoardProps> = ({ boardDeployment$, activeTab = 'das
       )}
 
       {activeTab === 'researcher' && (
-        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3 }}>
-          {/* Researcher Confidential Access Request */}
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3.5 }}>
+          {/* Researcher Access Request */}
           <Box sx={{ flex: 1 }}>
-            <Card sx={{ p: 3, height: '100%' }}>
-              <Typography variant="h6" sx={{ fontWeight: 700, mb: 1, color: '#67E8F9', display: 'flex', alignItems: 'center', gap: 1 }}>
-                <KeyIcon /> Request Research Access (ZK Proof)
+            <Card sx={{ p: 3.5, height: '100%' }}>
+              <Typography variant="h6" sx={{ fontWeight: 800, mb: 1, color: '#EA580C', display: 'flex', alignItems: 'center', gap: 1 }}>
+                <KeyIcon sx={{ color: '#F97316' }} /> Request Research Access (ZK Proof)
               </Typography>
-              <Typography variant="body2" sx={{ color: '#9CA3AF', mb: 3 }}>
+              <Typography variant="body2" sx={{ color: '#6B7280', mb: 3, lineHeight: 1.6 }}>
                 Researchers prove eligibility secretly using private medical credential witnesses without disclosing identities or license numbers on-chain.
               </Typography>
 
-              <Alert severity="info" sx={{ mb: 3, backgroundColor: 'rgba(0, 229, 255, 0.08)' }}>
+              <Alert severity="info" sx={{ mb: 3, backgroundColor: '#FFF7ED', border: '1px solid #FFEDD5', color: '#C2410C', borderRadius: 2.5 }}>
                 Private Witness: Local secret key & medical qualification credential verified via Zero-Knowledge circuit.
               </Alert>
 
@@ -384,7 +390,7 @@ export const Board: React.FC<BoardProps> = ({ boardDeployment$, activeTab = 'das
                 fullWidth
                 onClick={onRequestAccess}
                 disabled={boardState?.state === State.REQUESTED || boardState?.state === State.GRANTED}
-                sx={{ background: 'linear-gradient(135deg, #67E8F9 0%, #00E5FF 100%)', color: '#090D16', py: 1.2, fontWeight: 700 }}
+                sx={{ backgroundColor: '#F97316', color: '#FFFFFF', py: 1.4, fontWeight: 700, borderRadius: 2.5, '&:hover': { backgroundColor: '#EA580C' } }}
               >
                 Submit ZK Access Request
               </Button>
@@ -393,11 +399,11 @@ export const Board: React.FC<BoardProps> = ({ boardDeployment$, activeTab = 'das
 
           {/* Submit Patient Dataset Access Proof */}
           <Box sx={{ flex: 1 }}>
-            <Card sx={{ p: 3, height: '100%' }}>
-              <Typography variant="h6" sx={{ fontWeight: 700, mb: 1, color: '#34D399', display: 'flex', alignItems: 'center', gap: 1 }}>
-                <ScienceIcon /> Submit Dataset Access Proof
+            <Card sx={{ p: 3.5, height: '100%' }}>
+              <Typography variant="h6" sx={{ fontWeight: 800, mb: 1, color: '#EA580C', display: 'flex', alignItems: 'center', gap: 1 }}>
+                <ScienceIcon sx={{ color: '#F97316' }} /> Submit Dataset Access Proof
               </Typography>
-              <Typography variant="body2" sx={{ color: '#9CA3AF', mb: 2 }}>
+              <Typography variant="body2" sx={{ color: '#6B7280', mb: 2.5, lineHeight: 1.6 }}>
                 Generates and publishes an immutable ZK access proof using private patient record key.
               </Typography>
 
@@ -408,16 +414,15 @@ export const Board: React.FC<BoardProps> = ({ boardDeployment$, activeTab = 'das
                 placeholder="0x7a8f..."
                 value={patientHashInput}
                 onChange={(e) => setPatientHashInput(e.target.value)}
-                sx={{ mb: 2 }}
+                sx={{ mb: 2.5 }}
               />
 
               <Button
                 variant="contained"
                 fullWidth
-                color="secondary"
                 onClick={onSubmitAccessProof}
                 disabled={boardState?.state !== State.GRANTED}
-                sx={{ py: 1.2, fontWeight: 700 }}
+                sx={{ backgroundColor: '#10B981', color: '#FFFFFF', py: 1.4, fontWeight: 700, borderRadius: 2.5, '&:hover': { backgroundColor: '#059669' } }}
               >
                 Generate & Submit Access Proof
               </Button>
@@ -427,38 +432,38 @@ export const Board: React.FC<BoardProps> = ({ boardDeployment$, activeTab = 'das
       )}
 
       {activeTab === 'datasets' && (
-        <Card sx={{ p: 3 }}>
-          <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: '#00E5FF', display: 'flex', alignItems: 'center', gap: 1 }}>
-            <StorageIcon /> Medical Research Dataset Registry
+        <Card sx={{ p: 3.5 }}>
+          <Typography variant="h6" sx={{ fontWeight: 800, mb: 2.5, color: '#EA580C', display: 'flex', alignItems: 'center', gap: 1 }}>
+            <StorageIcon sx={{ color: '#F97316' }} /> Medical Research Dataset Registry
           </Typography>
-          <TableContainer component={Paper} sx={{ background: 'transparent' }}>
+          <TableContainer component={Paper} sx={{ background: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: 3, boxShadow: 'none' }}>
             <Table>
-              <TableHead>
+              <TableHead sx={{ backgroundColor: '#FAFAFA' }}>
                 <TableRow>
-                  <TableCell sx={{ color: '#9CA3AF', fontWeight: 700 }}>Dataset Title</TableCell>
-                  <TableCell sx={{ color: '#9CA3AF', fontWeight: 700 }}>Security Level</TableCell>
-                  <TableCell sx={{ color: '#9CA3AF', fontWeight: 700 }}>Access Status</TableCell>
-                  <TableCell sx={{ color: '#9CA3AF', fontWeight: 700 }}>Sample Size</TableCell>
-                  <TableCell sx={{ color: '#9CA3AF', fontWeight: 700 }}>Actions</TableCell>
+                  <TableCell sx={{ color: '#374151', fontWeight: 700 }}>Dataset Title</TableCell>
+                  <TableCell sx={{ color: '#374151', fontWeight: 700 }}>Security Level</TableCell>
+                  <TableCell sx={{ color: '#374151', fontWeight: 700 }}>Access Status</TableCell>
+                  <TableCell sx={{ color: '#374151', fontWeight: 700 }}>Sample Size</TableCell>
+                  <TableCell sx={{ color: '#374151', fontWeight: 700 }}>Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                <TableRow>
-                  <TableCell sx={{ fontWeight: 600 }}>{boardState?.datasetTitle ?? 'Genomic Oncology Cohort 2026'}</TableCell>
-                  <TableCell><Chip label="Level 3 ZK-Protected" size="small" color="primary" /></TableCell>
+                <TableRow sx={{ '&:nth-of-type(even)': { backgroundColor: '#FAFAFA' } }}>
+                  <TableCell sx={{ fontWeight: 600, color: '#1F2937' }}>{boardState?.datasetTitle ?? 'Genomic Oncology Cohort 2026'}</TableCell>
+                  <TableCell><Chip label="Level 3 ZK-Protected" size="small" sx={{ backgroundColor: '#FFF7ED', color: '#EA580C', fontWeight: 700 }} /></TableCell>
                   <TableCell><Chip label={accessStateLabel} size="small" color={boardState?.state === State.GRANTED ? 'success' : 'warning'} /></TableCell>
-                  <TableCell>14,280 Patients</TableCell>
+                  <TableCell sx={{ color: '#4B5563' }}>14,280 Patients</TableCell>
                   <TableCell>
-                    <Button size="small" variant="outlined" onClick={onRequestAccess} disabled={boardState?.state === State.GRANTED}>
+                    <Button size="small" variant="outlined" onClick={onRequestAccess} disabled={boardState?.state === State.GRANTED} sx={{ borderColor: '#F97316', color: '#EA580C' }}>
                       Request Access
                     </Button>
                   </TableCell>
                 </TableRow>
-                <TableRow>
-                  <TableCell sx={{ fontWeight: 600 }}>Cardiology Biomarker Study B</TableCell>
-                  <TableCell><Chip label="Level 3 ZK-Protected" size="small" color="primary" /></TableCell>
+                <TableRow sx={{ '&:nth-of-type(even)': { backgroundColor: '#FAFAFA' } }}>
+                  <TableCell sx={{ fontWeight: 600, color: '#1F2937' }}>Cardiology Biomarker Study B</TableCell>
+                  <TableCell><Chip label="Level 3 ZK-Protected" size="small" sx={{ backgroundColor: '#FFF7ED', color: '#EA580C', fontWeight: 700 }} /></TableCell>
                   <TableCell><Chip label="GRANTED" size="small" color="success" /></TableCell>
-                  <TableCell>8,500 Patients</TableCell>
+                  <TableCell sx={{ color: '#4B5563' }}>8,500 Patients</TableCell>
                   <TableCell>
                     <Button size="small" variant="outlined" color="success">View Cohort</Button>
                   </TableCell>
@@ -470,36 +475,36 @@ export const Board: React.FC<BoardProps> = ({ boardDeployment$, activeTab = 'das
       )}
 
       {activeTab === 'records' && (
-        <Card sx={{ p: 3 }}>
-          <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: '#10B981', display: 'flex', alignItems: 'center', gap: 1 }}>
-            <LockIcon /> Anonymized Patient Record Explorer
+        <Card sx={{ p: 3.5 }}>
+          <Typography variant="h6" sx={{ fontWeight: 800, mb: 2.5, color: '#EA580C', display: 'flex', alignItems: 'center', gap: 1 }}>
+            <LockIcon sx={{ color: '#F97316' }} /> Anonymized Patient Record Explorer
           </Typography>
-          <Alert severity="success" sx={{ mb: 3, backgroundColor: 'rgba(16, 185, 129, 0.08)' }}>
+          <Alert severity="success" sx={{ mb: 3, backgroundColor: '#ECFDF5', border: '1px solid #A7F3D0', color: '#047857', borderRadius: 2.5 }}>
             All patient records are protected by zero-knowledge access proofs. Patient PII is never stored or exposed.
           </Alert>
-          <TableContainer component={Paper} sx={{ background: 'transparent' }}>
+          <TableContainer component={Paper} sx={{ background: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: 3, boxShadow: 'none' }}>
             <Table>
-              <TableHead>
+              <TableHead sx={{ backgroundColor: '#FAFAFA' }}>
                 <TableRow>
-                  <TableCell sx={{ color: '#9CA3AF', fontWeight: 700 }}>Anonymized ID</TableCell>
-                  <TableCell sx={{ color: '#9CA3AF', fontWeight: 700 }}>Clinical Cohort</TableCell>
-                  <TableCell sx={{ color: '#9CA3AF', fontWeight: 700 }}>ZK Proof Hash</TableCell>
-                  <TableCell sx={{ color: '#9CA3AF', fontWeight: 700 }}>Verification Status</TableCell>
+                  <TableCell sx={{ color: '#374151', fontWeight: 700 }}>Anonymized ID</TableCell>
+                  <TableCell sx={{ color: '#374151', fontWeight: 700 }}>Clinical Cohort</TableCell>
+                  <TableCell sx={{ color: '#374151', fontWeight: 700 }}>ZK Proof Hash</TableCell>
+                  <TableCell sx={{ color: '#374151', fontWeight: 700 }}>Verification Status</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                <TableRow>
-                  <TableCell sx={{ fontFamily: 'monospace' }}>ANON-9041-X</TableCell>
-                  <TableCell>Oncology Cohort A</TableCell>
-                  <TableCell sx={{ fontFamily: 'monospace', color: '#00E5FF' }}>
+                <TableRow sx={{ '&:nth-of-type(even)': { backgroundColor: '#FAFAFA' } }}>
+                  <TableCell sx={{ fontFamily: 'monospace', fontWeight: 700 }}>ANON-9041-X</TableCell>
+                  <TableCell sx={{ color: '#4B5563' }}>Oncology Cohort A</TableCell>
+                  <TableCell sx={{ fontFamily: 'monospace', color: '#EA580C', fontWeight: 700 }}>
                     {boardState?.lastProofHash ? toHex(boardState.lastProofHash).slice(0, 16) + '...' : '0x7a8f9b2e...'}
                   </TableCell>
                   <TableCell><Chip label="ZK-Verified" size="small" color="success" icon={<CheckCircleIcon />} /></TableCell>
                 </TableRow>
-                <TableRow>
-                  <TableCell sx={{ fontFamily: 'monospace' }}>ANON-9042-Y</TableCell>
-                  <TableCell>Oncology Cohort A</TableCell>
-                  <TableCell sx={{ fontFamily: 'monospace', color: '#00E5FF' }}>0x3c9d1a4e...</TableCell>
+                <TableRow sx={{ '&:nth-of-type(even)': { backgroundColor: '#FAFAFA' } }}>
+                  <TableCell sx={{ fontFamily: 'monospace', fontWeight: 700 }}>ANON-9042-Y</TableCell>
+                  <TableCell sx={{ color: '#4B5563' }}>Oncology Cohort A</TableCell>
+                  <TableCell sx={{ fontFamily: 'monospace', color: '#EA580C', fontWeight: 700 }}>0x3c9d1a4e...</TableCell>
                   <TableCell><Chip label="ZK-Verified" size="small" color="success" icon={<CheckCircleIcon />} /></TableCell>
                 </TableRow>
               </TableBody>
@@ -509,17 +514,17 @@ export const Board: React.FC<BoardProps> = ({ boardDeployment$, activeTab = 'das
       )}
 
       {activeTab === 'zk-proofs' && (
-        <Card sx={{ p: 3 }}>
-          <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: '#67E8F9', display: 'flex', alignItems: 'center', gap: 1 }}>
-            <SecurityIcon /> Selective Disclosure & ZK Privacy Model
+        <Card sx={{ p: 3.5 }}>
+          <Typography variant="h6" sx={{ fontWeight: 800, mb: 2.5, color: '#EA580C', display: 'flex', alignItems: 'center', gap: 1 }}>
+            <SecurityIcon sx={{ color: '#F97316' }} /> Selective Disclosure & ZK Privacy Model
           </Typography>
-          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3 }}>
+          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3.5 }}>
             <Box sx={{ flex: 1 }}>
-              <Paper sx={{ p: 2.5, backgroundColor: 'rgba(0, 229, 255, 0.05)', border: '1px solid rgba(0, 229, 255, 0.2)', borderRadius: 2 }}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#00E5FF', mb: 1 }}>
+              <Paper sx={{ p: 3, backgroundColor: '#FFF7ED', border: '1px solid #FFEDD5', borderRadius: 3 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 800, color: '#EA580C', mb: 1.5 }}>
                   Public Ledger State (Disclosed)
                 </Typography>
-                <Typography variant="body2" component="div" sx={{ color: '#9CA3AF' }}>
+                <Typography variant="body2" component="div" sx={{ color: '#4B5563', lineHeight: 1.7 }}>
                   <ul>
                     <li>Dataset Title: "{boardState?.datasetTitle ?? 'Genomic Study'}"</li>
                     <li>Permission Status: {accessStateLabel}</li>
@@ -532,11 +537,11 @@ export const Board: React.FC<BoardProps> = ({ boardDeployment$, activeTab = 'das
             </Box>
 
             <Box sx={{ flex: 1 }}>
-              <Paper sx={{ p: 2.5, backgroundColor: 'rgba(16, 185, 129, 0.05)', border: '1px solid rgba(16, 185, 129, 0.2)', borderRadius: 2 }}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#10B981', mb: 1 }}>
+              <Paper sx={{ p: 3, backgroundColor: '#ECFDF5', border: '1px solid #A7F3D0', borderRadius: 3 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 800, color: '#047857', mb: 1.5 }}>
                   Private Witness State (Concealed)
                 </Typography>
-                <Typography variant="body2" component="div" sx={{ color: '#9CA3AF' }}>
+                <Typography variant="body2" component="div" sx={{ color: '#4B5563', lineHeight: 1.7 }}>
                   <ul>
                     <li>Medical License Secret Key (Never Disclosed)</li>
                     <li>Patient PII & Raw Identity Records</li>
@@ -551,15 +556,15 @@ export const Board: React.FC<BoardProps> = ({ boardDeployment$, activeTab = 'das
       )}
 
       {activeTab === 'audit' && (
-        <Card sx={{ p: 3 }}>
-          <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: '#10B981', display: 'flex', alignItems: 'center', gap: 1 }}>
-            <HistoryIcon /> Immutable Audit Log & On-Chain Verifier
+        <Card sx={{ p: 3.5 }}>
+          <Typography variant="h6" sx={{ fontWeight: 800, mb: 2.5, color: '#EA580C', display: 'flex', alignItems: 'center', gap: 1 }}>
+            <HistoryIcon sx={{ color: '#F97316' }} /> Immutable Audit Log & On-Chain Verifier
           </Typography>
-          <Paper sx={{ p: 2, mb: 3, background: 'rgba(0,0,0,0.4)', borderRadius: 2 }}>
-            <Typography variant="body2" sx={{ fontFamily: 'monospace', color: '#00E5FF', mb: 1 }}>
+          <Paper sx={{ p: 2.5, mb: 3, backgroundColor: '#FAFAFA', border: '1px solid #E5E7EB', borderRadius: 3 }}>
+            <Typography variant="body2" sx={{ fontFamily: 'monospace', color: '#EA580C', fontWeight: 700, mb: 1 }}>
               Audit Log Count: {boardState?.auditLogCount?.toString() ?? '0'}
             </Typography>
-            <Typography variant="body2" sx={{ fontFamily: 'monospace', color: '#10B981' }}>
+            <Typography variant="body2" sx={{ fontFamily: 'monospace', color: '#059669', fontWeight: 700 }}>
               Last Access Proof Hash: {boardState?.lastProofHash ? toHex(boardState.lastProofHash) : 'Init'}
             </Typography>
           </Paper>
@@ -567,23 +572,23 @@ export const Board: React.FC<BoardProps> = ({ boardDeployment$, activeTab = 'das
       )}
 
       {activeTab === 'analytics' && (
-        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 3 }}>
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 3.5 }}>
           <Box sx={{ flex: 1 }}>
-            <Card sx={{ p: 3, textAlign: 'center' }}>
-              <Typography variant="h3" sx={{ color: '#00E5FF', fontWeight: 800 }}>{boardState?.datasetCount?.toString() ?? '1'}</Typography>
-              <Typography variant="body2" sx={{ color: '#9CA3AF' }}>Total Registered Datasets</Typography>
+            <Card sx={{ p: 3.5, textAlign: 'center' }}>
+              <Typography variant="h2" sx={{ color: '#EA580C', fontWeight: 800 }}>{boardState?.datasetCount?.toString() ?? '1'}</Typography>
+              <Typography variant="body2" sx={{ color: '#6B7280', fontWeight: 600, mt: 0.5 }}>Total Registered Datasets</Typography>
             </Card>
           </Box>
           <Box sx={{ flex: 1 }}>
-            <Card sx={{ p: 3, textAlign: 'center' }}>
-              <Typography variant="h3" sx={{ color: '#10B981', fontWeight: 800 }}>{boardState?.auditLogCount?.toString() ?? '0'}</Typography>
-              <Typography variant="body2" sx={{ color: '#9CA3AF' }}>ZK Access Proofs Verified</Typography>
+            <Card sx={{ p: 3.5, textAlign: 'center' }}>
+              <Typography variant="h2" sx={{ color: '#059669', fontWeight: 800 }}>{boardState?.auditLogCount?.toString() ?? '0'}</Typography>
+              <Typography variant="body2" sx={{ color: '#6B7280', fontWeight: 600, mt: 0.5 }}>ZK Access Proofs Verified</Typography>
             </Card>
           </Box>
           <Box sx={{ flex: 1 }}>
-            <Card sx={{ p: 3, textAlign: 'center' }}>
-              <Typography variant="h3" sx={{ color: '#67E8F9', fontWeight: 800 }}>{boardState?.state === State.GRANTED ? '1' : '0'}</Typography>
-              <Typography variant="body2" sx={{ color: '#9CA3AF' }}>Active Research Grants</Typography>
+            <Card sx={{ p: 3.5, textAlign: 'center' }}>
+              <Typography variant="h2" sx={{ color: '#F97316', fontWeight: 800 }}>{boardState?.state === State.GRANTED ? '1' : '0'}</Typography>
+              <Typography variant="body2" sx={{ color: '#6B7280', fontWeight: 600, mt: 0.5 }}>Active Research Grants</Typography>
             </Card>
           </Box>
         </Box>

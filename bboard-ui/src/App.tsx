@@ -21,7 +21,7 @@ const App: React.FC = () => {
   }, [boardApiProvider]);
 
   return (
-    <Box sx={{ background: '#090D16', minHeight: '100vh', pb: 6 }}>
+    <Box sx={{ background: '#FAFAFA', minHeight: '100vh', pb: 6 }}>
       <Header activeTab={activeTab} onTabChange={setActiveTab} />
       <Container maxWidth="xl" sx={{ mt: 4 }}>
         {boardDeployments.map((boardDeployment, idx) => (

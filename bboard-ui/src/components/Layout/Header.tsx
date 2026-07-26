@@ -1,4 +1,4 @@
-// Private Medical Research Data Exchange Header
+// Private Medical Research Data Exchange Premium Header & Navigation
 
 import React, { useState } from 'react';
 import { AppBar, Box, Typography, Button, Chip } from '@mui/material';
@@ -6,6 +6,13 @@ import LockIcon from '@mui/icons-material/Lock';
 import ShieldIcon from '@mui/icons-material/Security';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
+import SchoolIcon from '@mui/icons-material/School';
+import StorageIcon from '@mui/icons-material/Storage';
+import VpnKeyIcon from '@mui/icons-material/VpnKey';
+import HistoryIcon from '@mui/icons-material/History';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 
 interface HeaderProps {
   activeTab?: string;
@@ -29,13 +36,13 @@ export const Header: React.FC<HeaderProps> = ({ activeTab = 'dashboard', onTabCh
   };
 
   const navItems = [
-    { id: 'dashboard', label: 'Hospital Dashboard' },
-    { id: 'researcher', label: 'Researcher Portal' },
-    { id: 'datasets', label: 'Dataset Registry' },
-    { id: 'records', label: 'Anonymous Patient Records' },
-    { id: 'zk-proofs', label: 'Selective Disclosure' },
-    { id: 'audit', label: 'Audit Log & Verification' },
-    { id: 'analytics', label: 'Research Analytics' },
+    { id: 'dashboard', label: 'Hospital Dashboard', icon: <LocalHospitalIcon fontSize="small" /> },
+    { id: 'researcher', label: 'Researcher Portal', icon: <SchoolIcon fontSize="small" /> },
+    { id: 'datasets', label: 'Dataset Registry', icon: <StorageIcon fontSize="small" /> },
+    { id: 'records', label: 'Anonymous Patient Records', icon: <VisibilityOffIcon fontSize="small" /> },
+    { id: 'zk-proofs', label: 'Selective Disclosure', icon: <VpnKeyIcon fontSize="small" /> },
+    { id: 'audit', label: 'Audit Log & Verification', icon: <HistoryIcon fontSize="small" /> },
+    { id: 'analytics', label: 'Research Analytics', icon: <AssessmentIcon fontSize="small" /> },
   ];
 
   return (
@@ -43,37 +50,38 @@ export const Header: React.FC<HeaderProps> = ({ activeTab = 'dashboard', onTabCh
       position="sticky"
       data-testid="header"
       sx={{
-        backgroundColor: 'rgba(9, 13, 22, 0.95)',
-        backdropFilter: 'blur(16px)',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
+        backgroundColor: '#FFFFFF',
+        borderBottom: '1px solid #E5E7EB',
+        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03)',
         px: { xs: 2, md: 4 },
         py: 1.5,
       }}
     >
+      {/* Top Header Row */}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
-        {/* Logo & Brand */}
+        {/* Logo & Application Title */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }} data-testid="header-logo">
           <Box
             sx={{
-              width: 42,
-              height: 42,
-              borderRadius: '10px',
-              background: 'linear-gradient(135deg, #00E5FF 0%, #10B981 100%)',
+              width: 44,
+              height: 44,
+              borderRadius: '12px',
+              backgroundColor: '#FFF7ED',
+              border: '1px solid #FFEDD5',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 0 15px rgba(0, 229, 255, 0.4)',
+              boxShadow: '0 2px 8px rgba(249, 115, 22, 0.15)',
             }}
           >
-            <ShieldIcon sx={{ color: '#090D16', fontSize: 26 }} />
+            <ShieldIcon sx={{ color: '#F97316', fontSize: 26 }} />
           </Box>
           <Box>
-            <Typography variant="h6" sx={{ fontWeight: 800, background: 'linear-gradient(90deg, #FFFFFF, #00E5FF)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', letterSpacing: '-0.02em' }}>
+            <Typography variant="h6" sx={{ fontWeight: 800, color: '#EA580C', letterSpacing: '-0.02em', fontSize: '1.25rem' }}>
               Private Medical Research Data Exchange
             </Typography>
-            <Typography variant="caption" sx={{ color: '#9CA3AF', display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <LockIcon sx={{ fontSize: 12, color: '#10B981' }} /> Midnight ZK Confidential Credentials & Access Proofs
+            <Typography variant="caption" sx={{ color: '#6B7280', display: 'flex', alignItems: 'center', gap: 0.5, fontWeight: 500 }}>
+              <LockIcon sx={{ fontSize: 13, color: '#10B981' }} /> Midnight ZK Confidential Credentials & Dataset Access Proofs
             </Typography>
           </Box>
         </Box>
@@ -84,10 +92,11 @@ export const Header: React.FC<HeaderProps> = ({ activeTab = 'dashboard', onTabCh
             label={`Network: ${networkEnv}`}
             size="small"
             sx={{
-              backgroundColor: 'rgba(0, 229, 255, 0.1)',
-              color: '#00E5FF',
-              border: '1px solid rgba(0, 229, 255, 0.3)',
-              fontWeight: 600,
+              backgroundColor: '#FFF7ED',
+              color: '#EA580C',
+              border: '1px solid #FFEDD5',
+              fontWeight: 700,
+              fontSize: '0.75rem',
             }}
           />
           {walletConnected ? (
@@ -98,11 +107,14 @@ export const Header: React.FC<HeaderProps> = ({ activeTab = 'dashboard', onTabCh
               startIcon={<CheckCircleIcon sx={{ color: '#10B981' }} />}
               sx={{
                 borderColor: '#10B981',
-                color: '#10B981',
-                '&:hover': { borderColor: '#059669', backgroundColor: 'rgba(16, 185, 129, 0.1)' },
+                color: '#059669',
+                backgroundColor: '#ECFDF5',
+                '&:hover': { borderColor: '#059669', backgroundColor: '#D1FAE5' },
+                py: 0.8,
+                px: 2,
               }}
             >
-              Lace Wallet Connected ({walletAddress})
+              Lace Connected ({walletAddress})
             </Button>
           ) : (
             <Button
@@ -111,10 +123,12 @@ export const Header: React.FC<HeaderProps> = ({ activeTab = 'dashboard', onTabCh
               onClick={handleWalletToggle}
               startIcon={<AccountBalanceWalletIcon />}
               sx={{
-                background: 'linear-gradient(135deg, #00E5FF 0%, #0284C7 100%)',
-                color: '#090D16',
+                backgroundColor: '#F97316',
+                color: '#FFFFFF',
                 fontWeight: 700,
-                '&:hover': { background: 'linear-gradient(135deg, #67E8F9 0%, #00E5FF 100%)' },
+                py: 0.8,
+                px: 2.5,
+                '&:hover': { backgroundColor: '#EA580C' },
               }}
             >
               Connect Lace Wallet
@@ -123,28 +137,52 @@ export const Header: React.FC<HeaderProps> = ({ activeTab = 'dashboard', onTabCh
         </Box>
       </Box>
 
-      {/* Navigation Tabs */}
-      <Box sx={{ display: 'flex', gap: 1, mt: 2, overflowX: 'auto', pb: 0.5 }}>
-        {navItems.map((item) => (
-          <Button
-            key={item.id}
-            size="small"
-            onClick={() => onTabChange?.(item.id)}
-            sx={{
-              color: activeTab === item.id ? '#00E5FF' : '#9CA3AF',
-              borderBottom: activeTab === item.id ? '2px solid #00E5FF' : '2px solid transparent',
-              borderRadius: 0,
-              px: 2,
-              py: 0.8,
-              fontSize: '0.85rem',
-              fontWeight: activeTab === item.id ? 700 : 500,
-              whiteSpace: 'nowrap',
-              '&:hover': { color: '#FFFFFF', backgroundColor: 'rgba(255,255,255,0.03)' },
-            }}
-          >
-            {item.label}
-          </Button>
-        ))}
+      {/* Modern Premium Navigation Bar */}
+      <Box
+        sx={{
+          display: 'flex',
+          gap: 1,
+          mt: 2,
+          overflowX: 'auto',
+          py: 0.5,
+          px: 0.5,
+          backgroundColor: '#FAFAFA',
+          borderRadius: 3,
+          border: '1px solid #E5E7EB',
+        }}
+      >
+        {navItems.map((item) => {
+          const isActive = activeTab === item.id;
+          return (
+            <Button
+              key={item.id}
+              size="small"
+              onClick={() => onTabChange?.(item.id)}
+              startIcon={React.cloneElement(item.icon, {
+                sx: { color: isActive ? '#F97316' : '#6B7280', transition: 'color 0.2s' },
+              })}
+              sx={{
+                color: isActive ? '#EA580C' : '#4B5563',
+                backgroundColor: isActive ? '#FFFFFF' : 'transparent',
+                borderRadius: 2,
+                px: 2,
+                py: 0.9,
+                fontSize: '0.85rem',
+                fontWeight: isActive ? 700 : 500,
+                whiteSpace: 'nowrap',
+                boxShadow: isActive ? '0 1px 3px rgba(0, 0, 0, 0.08)' : 'none',
+                border: isActive ? '1px solid #FFEDD5' : '1px solid transparent',
+                transition: 'all 0.2s ease-in-out',
+                '&:hover': {
+                  color: '#EA580C',
+                  backgroundColor: isActive ? '#FFFFFF' : '#FFF7ED',
+                },
+              }}
+            >
+              {item.label}
+            </Button>
+          );
+        })}
       </Box>
     </AppBar>
   );
