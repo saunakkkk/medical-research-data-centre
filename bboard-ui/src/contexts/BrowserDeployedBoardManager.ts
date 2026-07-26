@@ -239,15 +239,20 @@ export class BrowserDeployedBoardManager implements DeployedBoardAPIProvider {
 
   private async deployDeployment(deployment: BehaviorSubject<BoardDeployment>): Promise<void> {
     try {
-      // In fallback mode (no Lace wallet), use instant mock — avoids 2+ min ZK proof generation
+      // In fallback/undeployed mode — skip proof server, return instant mock
       if (_isFallbackMode) {
         const mockAddr = toHex(new Uint8Array(32).fill(0xab)) as ContractAddress;
-        const api = new MockBBoardAPI(mockAddr);
-        deployment.next({ status: 'deployed', api });
+        deployment.next({ status: 'deployed', api: new MockBBoardAPI(mockAddr) });
         return;
       }
       const providers = await this.getProviders();
-      const api = await BBoardAPI.deploy(providers, this.logger);
+      // 25s timeout guard — prevents infinite hang if proof server is unreachable
+      const api = await Promise.race([
+        BBoardAPI.deploy(providers, this.logger),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('Deploy timed out after 25 s — is the proof server running?')), 25_000)
+        ),
+      ]);
       deployment.next({ status: 'deployed', api });
     } catch (error: unknown) {
       deployment.next({
@@ -262,14 +267,18 @@ export class BrowserDeployedBoardManager implements DeployedBoardAPIProvider {
     contractAddress: ContractAddress,
   ): Promise<void> {
     try {
-      // In fallback mode (no Lace wallet), use instant mock
+      // In fallback/undeployed mode — instant mock join
       if (_isFallbackMode) {
-        const api = new MockBBoardAPI(contractAddress);
-        deployment.next({ status: 'deployed', api });
+        deployment.next({ status: 'deployed', api: new MockBBoardAPI(contractAddress) });
         return;
       }
       const providers = await this.getProviders();
-      const api = await BBoardAPI.join(providers, contractAddress, this.logger);
+      const api = await Promise.race([
+        BBoardAPI.join(providers, contractAddress, this.logger),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('Join timed out after 25 s')), 25_000)
+        ),
+      ]);
       deployment.next({ status: 'deployed', api });
     } catch (error: unknown) {
       deployment.next({
@@ -291,6 +300,12 @@ const initializeProviders = async (logger: Logger): Promise<BBoardProviders> => 
   const inMemoryBBoardPrivateStateProvider = inMemoryPrivateStateProvider<string, BBoardPrivateState>();
 
   try {
+    // On 'undeployed' network there is no live indexer/proof-server, so skip
+    // real ZK circuit entirely and use instant mock mode.
+    if (networkId === 'undeployed') {
+      _isFallbackMode = true;
+      throw new Error('undeployed network — using instant mock mode');
+    }
     const connectedAPI = await connectToWallet(logger, networkId);
     const config = await connectedAPI.getConfiguration();
     const shieldedAddresses = await connectedAPI.getShieldedAddresses();
