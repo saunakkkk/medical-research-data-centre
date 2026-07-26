@@ -18,8 +18,11 @@ import {
   type BBoardCircuitKeys,
   type BBoardProviders,
   type DeployedBBoardAPI,
+  type BBoardDerivedState,
 } from '../../../api/src/index';
+import { State } from '../../../contract/src/index';
 import { type ContractAddress, fromHex, toHex } from '@midnight-ntwrk/midnight-js-protocol/compact-runtime';
+import { BehaviorSubject as RxBehaviorSubject, type Observable as RxObservable } from 'rxjs';
 import {
   BehaviorSubject,
   catchError,
@@ -53,6 +56,62 @@ import { BBoardPrivateState } from '@midnight-ntwrk/bboard-contract';
 import { inMemoryPrivateStateProvider } from '../in-memory-private-state-provider';
 import { setNetworkId, NetworkId } from '@midnight-ntwrk/midnight-js-network-id';
 import type { UnboundTransaction } from '@midnight-ntwrk/midnight-js-types';
+
+// --- Mock API for local demo (no Lace wallet / proof server) ---
+// Provides instant, in-memory simulation of every ZK circuit operation.
+let _isFallbackMode = false;
+
+class MockBBoardAPI implements DeployedBBoardAPI {
+  readonly deployedContractAddress: ContractAddress;
+  readonly deployedContract: any = {} as any;
+  private readonly _state$: RxBehaviorSubject<BBoardDerivedState>;
+  readonly state$: RxObservable<BBoardDerivedState>;
+
+  constructor(contractAddress: ContractAddress) {
+    this.deployedContractAddress = contractAddress;
+    this._state$ = new RxBehaviorSubject<BBoardDerivedState>({
+      state: State.NONE,
+      sequence: 0n,
+      datasetTitle: undefined,
+      datasetCount: 0n,
+      activeResearcherPk: new Uint8Array(32),
+      auditLogCount: 0n,
+      lastProofHash: new Uint8Array(32),
+      isOwner: true,
+    });
+    this.state$ = this._state$.asObservable();
+  }
+
+  private _update(patch: Partial<BBoardDerivedState>): void {
+    this._state$.next({ ...this._state$.value, ...patch });
+  }
+
+  async registerDataset(title: string): Promise<void> {
+    const s = this._state$.value;
+    this._update({ datasetTitle: title, datasetCount: s.datasetCount + 1n, auditLogCount: s.auditLogCount + 1n });
+  }
+
+  async requestAccess(_datasetId: Uint8Array): Promise<void> {
+    const s = this._state$.value;
+    this._update({ state: State.REQUESTED, auditLogCount: s.auditLogCount + 1n });
+  }
+
+  async grantPermission(_datasetId: Uint8Array, researcherPk: Uint8Array): Promise<void> {
+    const s = this._state$.value;
+    this._update({ state: State.GRANTED, activeResearcherPk: researcherPk, auditLogCount: s.auditLogCount + 1n });
+  }
+
+  async submitAccessProof(_datasetId: Uint8Array, patientRecordHash: Uint8Array): Promise<void> {
+    const s = this._state$.value;
+    this._update({ lastProofHash: patientRecordHash, auditLogCount: s.auditLogCount + 1n });
+  }
+
+  async revokeAccess(_datasetId: Uint8Array): Promise<void> {
+    const s = this._state$.value;
+    this._update({ state: State.REVOKED, auditLogCount: s.auditLogCount + 1n });
+  }
+}
+// --- end MockBBoardAPI ---
 
 /**
  * An in-progress bulletin board deployment.
@@ -180,13 +239,16 @@ export class BrowserDeployedBoardManager implements DeployedBoardAPIProvider {
 
   private async deployDeployment(deployment: BehaviorSubject<BoardDeployment>): Promise<void> {
     try {
+      // In fallback mode (no Lace wallet), use instant mock — avoids 2+ min ZK proof generation
+      if (_isFallbackMode) {
+        const mockAddr = toHex(new Uint8Array(32).fill(0xab)) as ContractAddress;
+        const api = new MockBBoardAPI(mockAddr);
+        deployment.next({ status: 'deployed', api });
+        return;
+      }
       const providers = await this.getProviders();
       const api = await BBoardAPI.deploy(providers, this.logger);
-
-      deployment.next({
-        status: 'deployed',
-        api,
-      });
+      deployment.next({ status: 'deployed', api });
     } catch (error: unknown) {
       deployment.next({
         status: 'failed',
@@ -200,13 +262,15 @@ export class BrowserDeployedBoardManager implements DeployedBoardAPIProvider {
     contractAddress: ContractAddress,
   ): Promise<void> {
     try {
+      // In fallback mode (no Lace wallet), use instant mock
+      if (_isFallbackMode) {
+        const api = new MockBBoardAPI(contractAddress);
+        deployment.next({ status: 'deployed', api });
+        return;
+      }
       const providers = await this.getProviders();
       const api = await BBoardAPI.join(providers, contractAddress, this.logger);
-
-      deployment.next({
-        status: 'deployed',
-        api,
-      });
+      deployment.next({ status: 'deployed', api });
     } catch (error: unknown) {
       deployment.next({
         status: 'failed',
@@ -270,7 +334,9 @@ const initializeProviders = async (logger: Logger): Promise<BBoardProviders> => 
       },
     };
   } catch (err) {
-    logger.warn({ err }, 'Lace wallet extension not authorized or unavailable. Using fallback local providers.');
+    logger.warn({ err }, 'Lace wallet not available — enabling instant mock mode (no proof server).');
+    // Signal MockBBoardAPI path — deploy/join will skip proof server entirely
+    _isFallbackMode = true;
     const proofServerUrl = (import.meta.env.VITE_PROOF_SERVER_URL as string) || 'http://localhost:6300';
     const indexerUrl = (import.meta.env.VITE_INDEXER_URL as string) || 'https://indexer.preprod.midnight.network/api/v4/graphql';
     const indexerWsUrl = (import.meta.env.VITE_INDEXER_WS_URL as string) || 'wss://indexer.preprod.midnight.network/api/v4/graphql/ws';
