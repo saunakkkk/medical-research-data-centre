@@ -1,58 +1,36 @@
-// This file is part of midnightntwrk/example-bboard.
-// Copyright (C) Midnight Foundation
-// SPDX-License-Identifier: Apache-2.0
-// Licensed under the Apache License, Version 2.0 (the "License");
-// You may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// Private Medical Research Data Exchange Root App Component
 
 import React, { useEffect, useState } from 'react';
-import { Box } from '@mui/material';
-import { MainLayout, Board } from './components';
-import { useDeployedBoardContext } from './hooks';
-import { type BoardDeployment } from './contexts';
+import { Box, Container } from '@mui/material';
+import { Header } from './components/Layout/Header.js';
+import { Board } from './components/Board.js';
+import { useDeployedBoardContext } from './hooks/index.js';
+import { type BoardDeployment } from './contexts/index.js';
 import { type Observable } from 'rxjs';
 
-/**
- * The root bulletin board application component.
- *
- * @remarks
- * The {@link App} component requires a `<DeployedBoardProvider />` parent in order to retrieve
- * information about current bulletin board deployments.
- *
- * @internal
- */
 const App: React.FC = () => {
   const boardApiProvider = useDeployedBoardContext();
   const [boardDeployments, setBoardDeployments] = useState<Array<Observable<BoardDeployment>>>([]);
+  const [activeTab, setActiveTab] = useState('dashboard');
 
   useEffect(() => {
     const subscription = boardApiProvider.boardDeployments$.subscribe(setBoardDeployments);
-
     return () => {
       subscription.unsubscribe();
     };
   }, [boardApiProvider]);
 
   return (
-    <Box sx={{ background: '#000', minHeight: '100vh' }}>
-      <MainLayout>
+    <Box sx={{ background: '#090D16', minHeight: '100vh', pb: 6 }}>
+      <Header activeTab={activeTab} onTabChange={setActiveTab} />
+      <Container maxWidth="xl" sx={{ mt: 4 }}>
         {boardDeployments.map((boardDeployment, idx) => (
-          <div data-testid={`board-${idx}`} key={`board-${idx}`}>
-            <Board boardDeployment$={boardDeployment} />
-          </div>
+          <Box key={`board-${idx}`} sx={{ mb: 3 }}>
+            <Board boardDeployment$={boardDeployment} activeTab={activeTab} />
+          </Box>
         ))}
-        <div data-testid="board-start">
-          <Board />
-        </div>
-      </MainLayout>
+        {boardDeployments.length === 0 && <Board activeTab={activeTab} />}
+      </Container>
     </Box>
   );
 };
