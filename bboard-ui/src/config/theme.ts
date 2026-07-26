@@ -1,40 +1,54 @@
-// This file is part of midnightntwrk/example-bboard.
-// Copyright (C) Midnight Foundation
-// SPDX-License-Identifier: Apache-2.0
-// Licensed under the Apache License, Version 2.0 (the "License");
-// You may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// Private Medical Research Data Exchange MUI Theme Config
 
 import { createTheme, alpha } from '@mui/material';
 
-const midnightGrey = alpha('#a8a8a8', 0.7);
-
 export const theme = createTheme({
   typography: {
-    fontFamily: 'Helvetica',
+    fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
     allVariants: {
-      color: 'white',
+      color: '#F9FAFB',
     },
   },
   palette: {
+    mode: 'dark',
     primary: {
-      main: midnightGrey,
-      light: alpha(midnightGrey, 0.5),
-      dark: alpha(midnightGrey, 0.9),
+      main: '#00E5FF',
+      light: '#67E8F9',
+      dark: '#0284C7',
     },
     secondary: {
-      main: '#8c8c8c',
+      main: '#10B981',
+      light: '#34D399',
+      dark: '#059669',
     },
     background: {
-      default: '#464655',
+      default: '#090D16',
+      paper: '#111827',
+    },
+    text: {
+      primary: '#F9FAFB',
+      secondary: '#9CA3AF',
+    },
+  },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: 8,
+          textTransform: 'none',
+          fontWeight: 600,
+        },
+      },
+    },
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          borderRadius: 16,
+          backgroundColor: alpha('#111827', 0.85),
+          backdropFilter: 'blur(12px)',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
+        },
+      },
     },
   },
 });
