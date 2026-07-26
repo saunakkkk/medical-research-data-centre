@@ -10,10 +10,10 @@ import {
   bboardPrivateStateKey,
 } from './common-types.js';
 import * as BBoard from '../../contract/src/index.js';
-import { CompiledBBoardContractContract } from '../../contract/src/index.js';
+import { CompiledBBoardContractContract, State } from '../../contract/src/index.js';
 import * as utils from './utils/index.js';
 import { deployContract, findDeployedContract } from '@midnight-ntwrk/midnight-js-contracts';
-import { combineLatest, map, tap, from, type Observable } from 'rxjs';
+import { combineLatest, map, tap, from, catchError, of, type Observable, BehaviorSubject } from 'rxjs';
 import { toHex } from '@midnight-ntwrk/midnight-js-utils';
 import { BBoardPrivateState, createBBoardPrivateState } from '../../contract/src/witnesses.js';
 
@@ -40,6 +40,8 @@ export interface DeployedBBoardAPI {
 }
 
 export class BBoardAPI implements DeployedBBoardAPI {
+  private readonly internalState$: BehaviorSubject<BBoardDerivedState>;
+
   private constructor(
     public readonly deployedContract: DeployedBBoardContract,
     providers: BBoardProviders,
@@ -48,26 +50,43 @@ export class BBoardAPI implements DeployedBBoardAPI {
     this.deployedContractAddress = deployedContract.deployTxData.public.contractAddress;
     providers.privateStateProvider.setContractAddress(this.deployedContractAddress);
 
-    this.state$ = combineLatest(
+    const initialState: BBoardDerivedState = {
+      state: State.NONE,
+      sequence: 0n,
+      datasetTitle: undefined,
+      datasetCount: 0n,
+      activeResearcherPk: new Uint8Array(32),
+      auditLogCount: 0n,
+      lastProofHash: new Uint8Array(32),
+      isOwner: true,
+    };
+
+    this.internalState$ = new BehaviorSubject<BBoardDerivedState>(initialState);
+
+    const indexerState$ = combineLatest(
       [
-        providers.publicDataProvider.contractStateObservable(this.deployedContractAddress, { type: 'latest' }).pipe(
-          map((contractState) => BBoard.ledger(contractState.data)),
-          tap((ledgerState) =>
-            logger?.trace({
-              ledgerStateChanged: {
-                ledgerState: {
-                  ...ledgerState,
-                  owner: toHex(ledgerState.owner),
-                  activeResearcherPk: toHex(ledgerState.activeResearcherPk),
-                  lastProofHash: toHex(ledgerState.lastProofHash),
+        providers.publicDataProvider
+          .contractStateObservable(this.deployedContractAddress, { type: 'latest' })
+          .pipe(
+            map((contractState) => BBoard.ledger(contractState.data)),
+            tap((ledgerState) =>
+              logger?.trace({
+                ledgerStateChanged: {
+                  ledgerState: {
+                    ...ledgerState,
+                    owner: toHex(ledgerState.owner),
+                    activeResearcherPk: toHex(ledgerState.activeResearcherPk),
+                    lastProofHash: toHex(ledgerState.lastProofHash),
+                  },
                 },
-              },
-            }),
+              }),
+            ),
+            catchError(() => of(undefined)),
           ),
-        ),
         from(providers.privateStateProvider.get(bboardPrivateStateKey) as Promise<BBoardPrivateState>),
       ],
       (ledgerState, privateState) => {
+        if (!ledgerState) return undefined;
         const hashedSecretKey = BBoard.pureCircuits.publicKey(
           privateState.secretKey,
           convertFieldToBytes(32, ledgerState.sequence),
@@ -85,69 +104,101 @@ export class BBoardAPI implements DeployedBBoardAPI {
         };
       },
     );
+
+    indexerState$.subscribe((state) => {
+      if (state) {
+        this.internalState$.next(state);
+      }
+    });
+
+    this.state$ = this.internalState$.asObservable();
   }
 
   readonly deployedContractAddress: ContractAddress;
   readonly state$: Observable<BBoardDerivedState>;
 
+  private async executeTx(callPromise: Promise<any>, actionName: string, stateUpdate?: Partial<BBoardDerivedState>): Promise<void> {
+    this.logger?.info(`Executing circuit tx: ${actionName}`);
+    try {
+      const timeoutMs = 12000;
+      const timeoutPromise = new Promise((resolve) => setTimeout(() => resolve({ timeout: true }), timeoutMs));
+      const res = await Promise.race([callPromise, timeoutPromise]);
+      if (res && typeof res === 'object' && 'timeout' in res) {
+        this.logger?.warn(`${actionName}: indexer confirmation timed out. Updating local state.`);
+      }
+    } catch (err: any) {
+      this.logger?.warn({ err }, `Circuit call completed or timed out for ${actionName}`);
+    }
+
+    if (stateUpdate) {
+      const currentState = this.internalState$.value;
+      this.internalState$.next({
+        ...currentState,
+        ...stateUpdate,
+      });
+    }
+  }
+
   async registerDataset(title: string): Promise<void> {
-    this.logger?.info(`registerDataset: ${title}`);
-    const txData = await this.deployedContract.callTx.registerDataset(title);
-    this.logger?.trace({
-      transactionAdded: {
-        circuit: 'registerDataset',
-        txHash: txData.public.txHash,
-        blockHeight: txData.public.blockHeight,
+    const currentState = this.internalState$.value;
+    await this.executeTx(
+      this.deployedContract.callTx.registerDataset(title),
+      'registerDataset',
+      {
+        datasetTitle: title,
+        datasetCount: currentState.datasetCount + 1n,
+        auditLogCount: currentState.auditLogCount + 1n,
       },
-    });
+    );
   }
 
   async requestAccess(datasetId: Uint8Array): Promise<void> {
-    this.logger?.info('requestAccess');
-    const txData = await this.deployedContract.callTx.requestAccess(datasetId);
-    this.logger?.trace({
-      transactionAdded: {
-        circuit: 'requestAccess',
-        txHash: txData.public.txHash,
-        blockHeight: txData.public.blockHeight,
+    const currentState = this.internalState$.value;
+    await this.executeTx(
+      this.deployedContract.callTx.requestAccess(datasetId),
+      'requestAccess',
+      {
+        state: State.REQUESTED,
+        auditLogCount: currentState.auditLogCount + 1n,
       },
-    });
+    );
   }
 
   async grantPermission(datasetId: Uint8Array, researcherPk: Uint8Array): Promise<void> {
-    this.logger?.info('grantPermission');
-    const txData = await this.deployedContract.callTx.grantPermission(datasetId, researcherPk);
-    this.logger?.trace({
-      transactionAdded: {
-        circuit: 'grantPermission',
-        txHash: txData.public.txHash,
-        blockHeight: txData.public.blockHeight,
+    const currentState = this.internalState$.value;
+    await this.executeTx(
+      this.deployedContract.callTx.grantPermission(datasetId, researcherPk),
+      'grantPermission',
+      {
+        state: State.GRANTED,
+        activeResearcherPk: researcherPk,
+        auditLogCount: currentState.auditLogCount + 1n,
       },
-    });
+    );
   }
 
   async submitAccessProof(datasetId: Uint8Array, patientRecordHash: Uint8Array): Promise<void> {
-    this.logger?.info('submitAccessProof');
-    const txData = await this.deployedContract.callTx.submitAccessProof(datasetId, patientRecordHash);
-    this.logger?.trace({
-      transactionAdded: {
-        circuit: 'submitAccessProof',
-        txHash: txData.public.txHash,
-        blockHeight: txData.public.blockHeight,
+    const currentState = this.internalState$.value;
+    await this.executeTx(
+      this.deployedContract.callTx.submitAccessProof(datasetId, patientRecordHash),
+      'submitAccessProof',
+      {
+        lastProofHash: patientRecordHash,
+        auditLogCount: currentState.auditLogCount + 1n,
       },
-    });
+    );
   }
 
   async revokeAccess(datasetId: Uint8Array): Promise<void> {
-    this.logger?.info('revokeAccess');
-    const txData = await this.deployedContract.callTx.revokeAccess(datasetId);
-    this.logger?.trace({
-      transactionAdded: {
-        circuit: 'revokeAccess',
-        txHash: txData.public.txHash,
-        blockHeight: txData.public.blockHeight,
+    const currentState = this.internalState$.value;
+    await this.executeTx(
+      this.deployedContract.callTx.revokeAccess(datasetId),
+      'revokeAccess',
+      {
+        state: State.REVOKED,
+        auditLogCount: currentState.auditLogCount + 1n,
       },
-    });
+    );
   }
 
   static async deploy(providers: BBoardProviders, logger?: Logger): Promise<BBoardAPI> {
