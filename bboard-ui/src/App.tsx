@@ -2,10 +2,10 @@
 
 import React, { useEffect, useState } from 'react';
 import { Box, Container } from '@mui/material';
-import { Header } from './components/Layout/Header.js';
-import { Board } from './components/Board.js';
-import { useDeployedBoardContext } from './hooks/index.js';
-import { type BoardDeployment } from './contexts/index.js';
+import { Header } from './components/Layout/Header';
+import { Board } from './components/Board';
+import { useDeployedBoardContext } from './hooks';
+import { type BoardDeployment } from './contexts';
 import { type Observable } from 'rxjs';
 
 const App: React.FC = () => {
