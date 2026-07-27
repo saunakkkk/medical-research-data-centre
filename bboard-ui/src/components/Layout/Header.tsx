@@ -81,9 +81,12 @@ export const Header: React.FC<HeaderProps> = ({ activeTab = 'dashboard', onTabCh
       setConnecting(true);
       setAlertMessage(null);
 
-      // Attempt networks matching the wallet environment
-      const primaryNet = envNetwork.toLowerCase();
-      const candidateNetworks = Array.from(new Set([primaryNet, 'undeployed', 'preprod', 'testnet', 'devnet']));
+      // Attempt networks supported by Midnight SDK: 'undeployed', 'preprod', 'preview', 'mainnet'
+      const supportedMidnightNetworks = ['preprod', 'undeployed', 'preview', 'mainnet'];
+      const primaryNet = supportedMidnightNetworks.includes(envNetwork.toLowerCase())
+        ? envNetwork.toLowerCase()
+        : 'preprod';
+      const candidateNetworks = Array.from(new Set([primaryNet, 'preprod', 'undeployed', 'preview', 'mainnet']));
 
       let connected: ConnectedAPI | null = null;
       let matchedNet = primaryNet;
@@ -98,10 +101,11 @@ export const Header: React.FC<HeaderProps> = ({ activeTab = 'dashboard', onTabCh
         } catch (err: unknown) {
           lastError = err;
           const msg = String(err);
-          // If the error is network mismatch, try next network candidate
+          // If the error is network mismatch or unsupported network, try next candidate
           if (
             msg.toLowerCase().includes('network id mismatch') ||
             msg.toLowerCase().includes('network mismatch') ||
+            msg.toLowerCase().includes('unsupported network id') ||
             msg.toLowerCase().includes('network')
           ) {
             continue;
