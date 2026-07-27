@@ -1,11 +1,10 @@
 // Private Medical Research Data Exchange Premium Header & Navigation
 
-import React, { useState } from 'react';
+import React from 'react';
 import { AppBar, Box, Typography, Button, Chip } from '@mui/material';
 import LockIcon from '@mui/icons-material/Lock';
 import ShieldIcon from '@mui/icons-material/Security';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import SchoolIcon from '@mui/icons-material/School';
 import StorageIcon from '@mui/icons-material/Storage';
@@ -20,20 +19,7 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ activeTab = 'dashboard', onTabChange }) => {
-  const [walletConnected, setWalletConnected] = useState(false);
-  const [walletAddress, setWalletAddress] = useState<string | null>(null);
 
-  const networkEnv = String(import.meta.env.VITE_NETWORK || 'undeployed').toUpperCase();
-
-  const handleWalletToggle = () => {
-    if (walletConnected) {
-      setWalletConnected(false);
-      setWalletAddress(null);
-    } else {
-      setWalletConnected(true);
-      setWalletAddress('mn_addr_preprod1q9x...f8a2');
-    }
-  };
 
   const navItems = [
     { id: 'dashboard', label: 'Hospital Dashboard', icon: <LocalHospitalIcon fontSize="small" /> },
@@ -96,51 +82,39 @@ export const Header: React.FC<HeaderProps> = ({ activeTab = 'dashboard', onTabCh
         {/* Network & Wallet Controls */}
         <Box sx={{ display: 'flex', flexDirection: 'row', gap: 1.5, alignItems: 'center' }}>
           <Chip
-            label={`Network: ${networkEnv}`}
+            label="Midnight Demo"
             size="small"
+            icon={<ShieldIcon sx={{ fontSize: '14px !important', color: '#6366F1 !important' }} />}
             sx={{
-              backgroundColor: '#FFF7ED',
-              color: '#EA580C',
-              border: '1px solid #FFEDD5',
+              backgroundColor: '#EEF2FF',
+              color: '#4F46E5',
+              border: '1px solid #C7D2FE',
               fontWeight: 700,
               fontSize: '0.75rem',
             }}
           />
-          {walletConnected ? (
-            <Button
-              variant="outlined"
-              size="small"
-              onClick={handleWalletToggle}
-              startIcon={<CheckCircleIcon sx={{ color: '#10B981' }} />}
-              sx={{
-                borderColor: '#10B981',
-                color: '#059669',
-                backgroundColor: '#ECFDF5',
-                '&:hover': { borderColor: '#059669', backgroundColor: '#D1FAE5' },
-                py: 0.8,
-                px: 2,
-              }}
-            >
-              Lace Connected ({walletAddress})
-            </Button>
-          ) : (
-            <Button
-              variant="contained"
-              size="small"
-              onClick={handleWalletToggle}
-              startIcon={<AccountBalanceWalletIcon />}
-              sx={{
-                backgroundColor: '#F97316',
-                color: '#FFFFFF',
-                fontWeight: 700,
-                py: 0.8,
-                px: 2.5,
-                '&:hover': { backgroundColor: '#EA580C' },
-              }}
-            >
-              Connect Lace Wallet
-            </Button>
-          )}
+          <Button
+            variant="outlined"
+            size="small"
+            disabled
+            startIcon={<AccountBalanceWalletIcon />}
+            sx={{
+              borderColor: '#D1D5DB',
+              color: '#9CA3AF',
+              backgroundColor: '#F9FAFB',
+              fontWeight: 600,
+              py: 0.8,
+              px: 2,
+              cursor: 'not-allowed',
+              '&.Mui-disabled': {
+                borderColor: '#D1D5DB',
+                color: '#9CA3AF',
+                backgroundColor: '#F9FAFB',
+              },
+            }}
+          >
+            Midnight Wallet (Demo Build)
+          </Button>
         </Box>
       </Box>
 
