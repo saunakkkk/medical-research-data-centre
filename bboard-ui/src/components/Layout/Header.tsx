@@ -51,15 +51,20 @@ export const Header: React.FC<HeaderProps> = ({ activeTab = 'dashboard', onTabCh
   ).toUpperCase();
 
   useEffect(() => {
-    // Check if wallet is already connected or available on mount
-    const wallet = getMidnightWallet();
-    if (wallet) {
-      console.log('Midnight Lace wallet extension detected:', wallet.name, wallet.apiVersion);
+    // Check if wallet is available on window.midnight
+    if (typeof window !== 'undefined') {
+      const midnight = window.midnight;
+      if (midnight) {
+        console.log('[Midnight Wallet] window.midnight detected:', Object.keys(midnight));
+      } else {
+        console.log('[Midnight Wallet] window.midnight is not injected yet.');
+      }
     }
   }, []);
 
   const handleConnectWallet = async () => {
     if (walletAddress) {
+      console.log('[Midnight Wallet] Disconnecting wallet...');
       setWalletAddress(null);
       setConnectedApi(null);
       setConnectedNetwork(null);
@@ -70,6 +75,7 @@ export const Header: React.FC<HeaderProps> = ({ activeTab = 'dashboard', onTabCh
 
     const wallet = getMidnightWallet();
     if (!wallet) {
+      console.warn('[Midnight Wallet] No compatible Midnight wallet found on window.midnight');
       setAlertMessage(
         'Midnight Lace Wallet browser extension not detected. Please install or enable the Midnight Lace Wallet extension.',
       );
@@ -77,31 +83,31 @@ export const Header: React.FC<HeaderProps> = ({ activeTab = 'dashboard', onTabCh
       return;
     }
 
+    console.log('[Midnight Wallet] Selected wallet:', wallet.name, 'apiVersion:', wallet.apiVersion, 'rdns:', wallet.rdns);
+
     try {
       setConnecting(true);
       setAlertMessage(null);
 
-      // Attempt networks supported by Midnight SDK: 'undeployed', 'preprod', 'preview', 'mainnet'
-      const supportedMidnightNetworks = ['preprod', 'undeployed', 'preview', 'mainnet'];
-      const primaryNet = supportedMidnightNetworks.includes(envNetwork.toLowerCase())
-        ? envNetwork.toLowerCase()
-        : 'preprod';
-      const candidateNetworks = Array.from(new Set([primaryNet, 'preprod', 'undeployed', 'preview', 'mainnet']));
-
+      // Candidate network IDs supported by Midnight SDK
+      const candidateNetworks = ['preprod', 'undeployed', 'preview', 'mainnet'];
       let connected: ConnectedAPI | null = null;
-      let matchedNet = primaryNet;
+      let matchedNet = 'preprod';
       let lastError: unknown = null;
 
       for (const netId of candidateNetworks) {
         try {
+          console.log(`[Midnight Wallet] Attempting connect to network: '${netId}'...`);
           connected = await wallet.connect(netId);
           matchedNet = netId;
+          console.log(`[Midnight Wallet] Successfully connected on network '${netId}'!`);
           setNetworkId(netId as NetworkId);
           break;
         } catch (err: unknown) {
           lastError = err;
           const msg = String(err);
-          // If the error is network mismatch or unsupported network, try next candidate
+          console.log(`[Midnight Wallet] Connect attempt for '${netId}' returned:`, msg);
+
           if (
             msg.toLowerCase().includes('network id mismatch') ||
             msg.toLowerCase().includes('network mismatch') ||
@@ -110,37 +116,42 @@ export const Header: React.FC<HeaderProps> = ({ activeTab = 'dashboard', onTabCh
           ) {
             continue;
           }
-          // If user explicitly cancelled / denied permission, rethrow immediately
+          // If user explicitly closed or denied the popup
           throw err;
         }
       }
 
       if (!connected) {
-        throw lastError || new Error('Unable to align wallet network ID.');
+        throw lastError || new Error('Could not align wallet network ID.');
       }
 
       setConnectedApi(connected);
       setConnectedNetwork(matchedNet.toUpperCase());
 
+      // Fetch wallet addresses
       let address = '';
       try {
         const shielded = await connected.getShieldedAddresses();
+        console.log('[Midnight Wallet] Shielded address retrieved:', shielded.shieldedAddress);
         address = shielded.shieldedAddress;
-      } catch {
+      } catch (errShielded) {
+        console.warn('[Midnight Wallet] Shielded address lookup error:', errShielded);
         try {
           const unshielded = await connected.getUnshieldedAddress();
+          console.log('[Midnight Wallet] Unshielded address retrieved:', unshielded.unshieldedAddress);
           address = unshielded.unshieldedAddress;
-        } catch {
+        } catch (errUnshielded) {
+          console.warn('[Midnight Wallet] Unshielded address lookup error:', errUnshielded);
           address = 'Connected';
         }
       }
 
       setWalletAddress(address);
-      setAlertMessage(`Connected to Midnight Lace Wallet (${truncateAddress(address)}) on ${matchedNet.toUpperCase()}`);
+      setAlertMessage(`Successfully connected to ${wallet.name || 'Lace Wallet'} (${truncateAddress(address)}) on ${matchedNet.toUpperCase()}`);
       setAlertSeverity('success');
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
-      console.error('Midnight Lace wallet connection error:', err);
+      console.error('[Midnight Wallet] Wallet connection failed:', err);
       setAlertMessage(`Wallet connection failed: ${msg}`);
       setAlertSeverity('error');
     } finally {
