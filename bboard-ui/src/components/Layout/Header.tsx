@@ -15,6 +15,8 @@ import AssessmentIcon from '@mui/icons-material/Assessment';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import type { InitialAPI, ConnectedAPI } from '@midnight-ntwrk/dapp-connector-api';
 
+import { setNetworkId, type NetworkId } from '@midnight-ntwrk/midnight-js-network-id';
+
 interface HeaderProps {
   activeTab?: string;
   onTabChange?: (tab: string) => void;
@@ -40,6 +42,7 @@ export const Header: React.FC<HeaderProps> = ({ activeTab = 'dashboard', onTabCh
   const [connecting, setConnecting] = useState(false);
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [, setConnectedApi] = useState<ConnectedAPI | null>(null);
+  const [connectedNetwork, setConnectedNetwork] = useState<string | null>(null);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [alertSeverity, setAlertSeverity] = useState<'error' | 'warning' | 'info' | 'success'>('info');
 
@@ -59,6 +62,7 @@ export const Header: React.FC<HeaderProps> = ({ activeTab = 'dashboard', onTabCh
     if (walletAddress) {
       setWalletAddress(null);
       setConnectedApi(null);
+      setConnectedNetwork(null);
       setAlertMessage('Wallet disconnected.');
       setAlertSeverity('info');
       return;
@@ -77,11 +81,42 @@ export const Header: React.FC<HeaderProps> = ({ activeTab = 'dashboard', onTabCh
       setConnecting(true);
       setAlertMessage(null);
 
-      const networkId = envNetwork.toLowerCase() === 'preprod' ? 'preprod' : 'undeployed';
+      // Attempt networks matching the wallet environment
+      const primaryNet = envNetwork.toLowerCase();
+      const candidateNetworks = Array.from(new Set([primaryNet, 'undeployed', 'preprod', 'testnet', 'devnet']));
 
-      // Triggers authentic browser wallet authorization popup
-      const connected = await wallet.connect(networkId);
+      let connected: ConnectedAPI | null = null;
+      let matchedNet = primaryNet;
+      let lastError: unknown = null;
+
+      for (const netId of candidateNetworks) {
+        try {
+          connected = await wallet.connect(netId);
+          matchedNet = netId;
+          setNetworkId(netId as NetworkId);
+          break;
+        } catch (err: unknown) {
+          lastError = err;
+          const msg = String(err);
+          // If the error is network mismatch, try next network candidate
+          if (
+            msg.toLowerCase().includes('network id mismatch') ||
+            msg.toLowerCase().includes('network mismatch') ||
+            msg.toLowerCase().includes('network')
+          ) {
+            continue;
+          }
+          // If user explicitly cancelled / denied permission, rethrow immediately
+          throw err;
+        }
+      }
+
+      if (!connected) {
+        throw lastError || new Error('Unable to align wallet network ID.');
+      }
+
       setConnectedApi(connected);
+      setConnectedNetwork(matchedNet.toUpperCase());
 
       let address = '';
       try {
@@ -97,7 +132,7 @@ export const Header: React.FC<HeaderProps> = ({ activeTab = 'dashboard', onTabCh
       }
 
       setWalletAddress(address);
-      setAlertMessage(`Connected to Midnight Lace Wallet (${truncateAddress(address)})`);
+      setAlertMessage(`Connected to Midnight Lace Wallet (${truncateAddress(address)}) on ${matchedNet.toUpperCase()}`);
       setAlertSeverity('success');
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
@@ -170,7 +205,7 @@ export const Header: React.FC<HeaderProps> = ({ activeTab = 'dashboard', onTabCh
         {/* Network & Wallet Controls */}
         <Box sx={{ display: 'flex', flexDirection: 'row', gap: 1.5, alignItems: 'center' }}>
           <Chip
-            label={`Network: ${envNetwork}`}
+            label={`Network: ${connectedNetwork || envNetwork}`}
             size="small"
             icon={<ShieldIcon sx={{ fontSize: '14px !important', color: '#EA580C !important' }} />}
             sx={{
