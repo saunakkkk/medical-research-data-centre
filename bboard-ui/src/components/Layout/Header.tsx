@@ -15,7 +15,7 @@ import AssessmentIcon from '@mui/icons-material/Assessment';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import type { InitialAPI, ConnectedAPI } from '@midnight-ntwrk/dapp-connector-api';
 
-import { setNetworkId, type NetworkId } from '@midnight-ntwrk/midnight-js-network-id';
+import { setNetworkId } from '@midnight-ntwrk/midnight-js-network-id';
 
 interface HeaderProps {
   activeTab?: string;
@@ -28,8 +28,7 @@ const getMidnightWallet = (): InitialAPI | undefined => {
     return window.midnight['mnLace'];
   }
   return Object.values(window.midnight).find(
-    (wallet): wallet is InitialAPI =>
-      !!wallet && typeof wallet === 'object' && typeof wallet.connect === 'function',
+    (wallet): wallet is InitialAPI => !!wallet && typeof wallet === 'object' && typeof wallet.connect === 'function',
   );
 };
 
@@ -46,9 +45,7 @@ export const Header: React.FC<HeaderProps> = ({ activeTab = 'dashboard', onTabCh
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [alertSeverity, setAlertSeverity] = useState<'error' | 'warning' | 'info' | 'success'>('info');
 
-  const envNetwork = String(
-    import.meta.env.VITE_NETWORK_ID || import.meta.env.VITE_NETWORK || 'preprod',
-  ).toUpperCase();
+  const envNetwork = String(import.meta.env.VITE_NETWORK_ID || import.meta.env.VITE_NETWORK || 'preprod').toUpperCase();
 
   useEffect(() => {
     // Check if wallet is available on window.midnight
@@ -83,7 +80,14 @@ export const Header: React.FC<HeaderProps> = ({ activeTab = 'dashboard', onTabCh
       return;
     }
 
-    console.log('[Midnight Wallet] Selected wallet:', wallet.name, 'apiVersion:', wallet.apiVersion, 'rdns:', wallet.rdns);
+    console.log(
+      '[Midnight Wallet] Selected wallet:',
+      wallet.name,
+      'apiVersion:',
+      wallet.apiVersion,
+      'rdns:',
+      wallet.rdns,
+    );
 
     try {
       setConnecting(true);
@@ -101,7 +105,7 @@ export const Header: React.FC<HeaderProps> = ({ activeTab = 'dashboard', onTabCh
           connected = await wallet.connect(netId);
           matchedNet = netId;
           console.log(`[Midnight Wallet] Successfully connected on network '${netId}'!`);
-          setNetworkId(netId as NetworkId);
+          setNetworkId(netId);
           break;
         } catch (err: unknown) {
           lastError = err;
@@ -122,7 +126,11 @@ export const Header: React.FC<HeaderProps> = ({ activeTab = 'dashboard', onTabCh
       }
 
       if (!connected) {
-        throw lastError || new Error('Could not align wallet network ID.');
+        const errMsg =
+          lastError instanceof Error
+            ? lastError.message
+            : 'Could not align wallet network ID after trying all networks.';
+        throw new Error(errMsg);
       }
 
       setConnectedApi(connected);
@@ -147,7 +155,9 @@ export const Header: React.FC<HeaderProps> = ({ activeTab = 'dashboard', onTabCh
       }
 
       setWalletAddress(address);
-      setAlertMessage(`Successfully connected to ${wallet.name || 'Lace Wallet'} (${truncateAddress(address)}) on ${matchedNet.toUpperCase()}`);
+      setAlertMessage(
+        `Successfully connected to ${wallet.name || 'Lace Wallet'} (${truncateAddress(address)}) on ${matchedNet.toUpperCase()}`,
+      );
       setAlertSeverity('success');
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
