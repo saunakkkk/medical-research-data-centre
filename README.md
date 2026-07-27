@@ -104,12 +104,9 @@ evokeAccess, submitAccessProof).
 | Setting | Value / Details |
 | :--- | :--- |
 | **Target Network** | Midnight Preprod Network |
-| **Contract Name** | board.compact (@midnight-ntwrk/bboard-contract) |
-| **Circuit Artifacts** | grantPermission, 
-egisterDataset, 
-equestAccess, 
-evokeAccess, submitAccessProof |
-| **Compiler Version** | Compact 0.5.1 (CLI 0.31.0) |
+| **Contract Name** | bboard.compact (@midnight-ntwrk/bboard-contract) |
+| **Circuit Artifacts** | grantPermission, registerDataset, requestAccess, revokeAccess, submitAccessProof |
+| **Compiler Version** | Compact  0.5.1 (CLI  0.31.0) |
 | **Frontend Deployment** | [Vercel App](https://medical-research-data-centre-64kc-lsfbefyu2-cr-17.vercel.app) |
 | **GitHub Repository** | [saunakkkk/medical-research-data-centre](https://github.com/saunakkkk/medical-research-data-centre) |
 | **CI/CD Pipeline** | [GitHub Actions Workflow](https://github.com/saunakkkk/medical-research-data-centre/actions) |
@@ -118,52 +115,54 @@ evokeAccess, submitAccessProof |
 
 ## 👛 Wallet Connection Lifecycle
 
-The application integrates with the official **Midnight Lace Browser Wallet** (window.midnight.mnLace).
+The application integrates with the official **Midnight Lace Browser Wallet** (`window.midnight.mnLace`).
 
-
+1. **Detection & Injection**: The frontend checks for the `window.midnight.mnLace` object injected by the browser extension.
+2. **Access Authorization**: Requests wallet connection to retrieve the user's Preprod account address and network state.
+3. **ZK Proof Signing**: Interacts with the Lace Wallet provider to sign zero-knowledge state transactions.
 
 ---
 
-## ⚡ Quickstart & Local Setup
+## 🚀 Local Setup & Installation
 
 ### Prerequisites
-- **OS**: Linux or macOS (Windows users must use WSL2 Ubuntu)
-- **Node.js**: 20.0.0 or 22.x (
-ode -v)
-- **npm**: 10.x or higher (
-pm -v)
+- **OS**: Linux, macOS, or Windows (via WSL2 Ubuntu)
+- **Node.js**: `>=20.0.0` or `22.x` (`node -v`)
+- **npm**: `>=10.x` (`npm -v`)
 - **Docker**: Docker & Docker Compose daemon running (required for local Midnight Proof Server)
+- **Compact Compiler**: `compact` CLI `v0.31.0` / Compiler `v0.5.1`
 
 ### 1. Clone Repository & Install Dependencies
 
-added 864 packages, and audited 869 packages in 2m
-
-210 packages are looking for funding
-  run `npm fund` for details
-
-16 vulnerabilities (6 low, 6 moderate, 4 high)
-
-To address issues that do not require attention, run:
-  npm audit fix
-
-To address all issues possible (including breaking changes), run:
-  npm audit fix --force
-
-Some issues need review, and may require choosing
-a different dependency.
-
-Run `npm audit` for details.
+```bash
+git clone https://github.com/saunakkkk/medical-research-data-centre.git
+cd medical-research-data-centre
+npm ci --legacy-peer-deps
+```
 
 ### 2. Compile Compact Smart Contract
 
+```bash
+npm run compact -w contract
+```
 
-### 3. Start Local Midnight Proof Server (Optional for local proof generation)
+### 3. Start Local Midnight Proof Server
 
+```bash
+docker run -p 6300:6300 midnightntwrk/proof-server:latest
+```
 
 ### 4. Build Workspace Packages
 
+```bash
+npm run build
+```
 
 ### 5. Launch Frontend Development Server
+
+```bash
+npm run dev -w bboard-ui
+```
 
 Open [http://localhost:5173](http://localhost:5173) in your browser.
 
@@ -171,12 +170,27 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 
 ## 🧪 Automated Testing
 
-The contract workspace includes a comprehensive unit test suite written with **Vitest** that validates all smart contract state transitions and ZK proof verifications.
+The contract workspace includes a unit test suite written with **Vitest** that validates smart contract state transitions and ZK proof verifications.
 
-
+```bash
+npm test -w contract
+```
 
 ### Expected Output
 
+```text
+> @midnight-ntwrk/bboard-contract@0.1.0 test
+> vitest
+
+ RUN  v4.1.9 /home/user/midnight-projects/private-medical-research-data-exchange/contract
+
+ ✓ src/test/bboard.test.ts (5 tests) 312ms
+
+ Test Files  1 passed (1)
+      Tests  5 passed (5)
+   Start at  11:47:47
+   Duration  1.01s (transform 268ms, setup 0ms, import 378ms, tests 312ms, environment 0ms)
+```
 
 ---
 
@@ -198,29 +212,107 @@ The contract workspace includes a comprehensive unit test suite written with **V
 
 ## 🏗️ System Architecture
 
+The **Private Medical Research Data Exchange** is constructed with a privacy-first multi-tier architecture powered by the Midnight Protocol.
 
+### Architectural Components
+
+1. **Midnight Compact Smart Contract (`contract/src/bboard.compact`)**
+   - **`registerDataset`**: Registers anonymized medical research cohorts with cryptographic commitments on-chain.
+   - **`grantPermission`**: Grants research access permissions to authorized researcher public keys (`activeResearcherPk`).
+   - **`requestAccess`**: Submits confidential research access requests verified via private credential witnesses.
+   - **`revokeAccess`**: Revokes institutional research dataset permissions.
+   - **`submitAccessProof`**: Generates and publishes immutable dataset access proof hashes without exposing patient PII.
+
+2. **Full-Stack React Application (`bboard-ui`)**
+   - Built with **React 19**, **Vite**, **TypeScript**, and **Material-UI (MUI)**.
+   - Features 7 interactive views: Hospital Dashboard, Researcher Portal, Dataset Registry, Anonymous Patient Records Explorer, Selective Disclosure Engine, Audit Log, and Research Analytics.
+
+3. **Browser Wallet (`window.midnight.mnLace`)**
+   - Integrates directly with the **Midnight Lace Browser Wallet**.
+   - Manages secret witnesses locally, signs transaction payloads, and maintains network sync with Midnight Preprod.
+
+4. **Local Proof Server (`midnight-proof-server`)**
+   - Executes prover circuit computations locally via HTTP/WebSocket on port `6300`.
+   - Ensures private witness parameters never leak over network boundaries.
+
+5. **Midnight Infrastructure**
+   - Interacts with the **Midnight Preprod Network** and indexing node infrastructure for fetching public ledger state.
+
+### System Dataflow & Sequence Diagram
+
+```text
+┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                🏥 Hospital Dashboard (Client UI)                                 │
+│          - Registers Research Datasets                  - Grants & Revokes Permissions           │
+└────────────────────────────────────────────────┬─────────────────────────────────────────────────┘
+                                                 │
+                                                 ▼
+┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                             📜 Midnight Compact Smart Contract                                   │
+│  - bboard.compact (registerDataset, grantPermission, requestAccess, revokeAccess, submitAccessProof) │
+└────────────────────────────────────────────────┬─────────────────────────────────────────────────┘
+                                                 │
+                                                 ▼
+┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                           🔐 Research Permission Verification                                    │
+│       - Verifies ZK Credential Witnesses              - Enforces Access Status Transitions       │
+└────────────────────────────────────────────────┬─────────────────────────────────────────────────┘
+                                                 │
+                                                 ▼
+┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                             🧬 Anonymous Patient Records Explorer                                │
+│       - Zero-Knowledge Verified Cohorts               - Cryptographic Commitment Hashes          │
+└────────────────────────────────────────────────┬─────────────────────────────────────────────────┘
+                                                 │
+                                                 ▼
+┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                 🎓 Researcher Portal (Client UI)                                 │
+│       - Requests Confidential Access                  - Submits Access Proof Witness             │
+└────────────────────────────────────────────────┬─────────────────────────────────────────────────┘
+                                                 │
+                                                 ▼
+┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                              📜 Immutable Audit Log Verification                                  │
+│       - Persisted Access Proof Hashes                 - Verifiable On-Chain Event History        │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
 ## 📁 Monorepo Structure
 
-
+```text
+private-medical-research-data-exchange/
+├── api/                   # Shared API utilities and contract bindings
+├── bboard-cli/            # Command line interface for contract operations
+├── bboard-ui/             # React 19 web application (Vite, Material-UI)
+│   ├── public/            # Static assets, keys, and ZKIR managed files
+│   └── src/               # React components, pages, layout & hooks
+├── contract/              # Compact smart contract workspace
+│   ├── src/
+│   │   ├── bboard.compact # Compact smart contract implementation
+│   │   ├── managed/       # Compiled ZK circuit artifacts, keys & ZKIR
+│   │   └── test/          # Vitest contract unit tests
+│   └── package.json
+├── docs/                  # Screenshots and documentation assets
+├── .github/workflows/     # GitHub Actions CI/CD pipelines
+├── package.json           # Workspace configuration & scripts
+├── README.md              # Project documentation
+└── vercel.json            # Vercel deployment configuration
+```
 
 ---
 
 ## ⚙️ CI/CD Pipeline
 
-The repository utilizes **GitHub Actions** (.github/workflows/ci.yml) to enforce code quality, dependency validation, security auditing, and build verification on every commit:
+The repository utilizes **GitHub Actions** (`.github/workflows/ci.yml`) to enforce code quality, dependency validation, security auditing, and build verification on every commit:
 
 1. **Repository Integrity Check**: Ensures all required configuration files and templates are present.
 2. **Security Audit**: Scans for accidental secret leaks or hardcoded private key blocks.
-3. **Compact Compiler Setup**: Installs midnightntwrk/setup-compact-action@v1.
-4. **Node.js & Workspace Install**: Sets up Node.js 22 and installs dependencies via 
-pm ci --legacy-peer-deps.
-5. **Contract Compilation & Verification**: Executes 
-pm run compact and verifies ZK circuit generation.
-6. **Workspace Build Verification**: Runs full production workspace builds (
-pm run build).
+3. **Compact Compiler Setup**: Installs `midnightntwrk/setup-compact-action@v1`.
+4. **Node.js & Workspace Install**: Sets up Node.js 22 and installs dependencies via `npm ci --legacy-peer-deps`.
+5. **Contract Compilation & Verification**: Executes `npm run compact -w contract` and verifies ZK circuit generation.
+6. **Workspace Build Verification**: Runs full production workspace builds (`npm run build`).
 
 ---
 
@@ -228,14 +320,14 @@ pm run build).
 
 1. **Zero-Knowledge Proof Isolation**: Prover witnesses never cross the boundary between client browser and network nodes.
 2. **Selective Disclosure Control**: On-chain data is restricted strictly to derived public commitments and verification hashes.
-3. **Tamper-Proof Audit Logs**: Every research access proof generates an unforgeable cryptographic hash persistentHash([patientRecordHash, pKey, activeResearcherPk]).
+3. **Tamper-Proof Audit Logs**: Every research access proof generates an unforgeable cryptographic hash `persistentHash([patientRecordHash, pKey, activeResearcherPk])`.
 4. **Credential Confidentiality**: Medical license numbers and institutional secrets remain offline within the user's local state.
 
 ---
 
 ## 🛣️ Roadmap
 
-- [x] **Phase 1**: Implement board.compact smart contract with 5 ZK circuits.
+- [x] **Phase 1**: Implement `bboard.compact` smart contract with 5 ZK circuits.
 - [x] **Phase 2**: Create full-stack React 19 web application with Lace Wallet integration.
 - [x] **Phase 3**: Deploy production build to Vercel and establish automated CI/CD pipeline.
 - [ ] **Phase 4**: Add multi-hospital federated research permission governance.
