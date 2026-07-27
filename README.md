@@ -7,13 +7,13 @@
 
 ### 🖼️ Platform Showcase Gallery
 
-![Hospital Dashboard](docs/screenshots/hospital-dashboard.png)
+![Hospital Dashboard](docs/screenshots/hospital-dashboard-v2.png)
 *Hospital Dashboard — Smart Contract Initialization & Dataset Management*
 
-![Researcher Portal](docs/screenshots/researcher-portal.png)
+![Researcher Portal](docs/screenshots/researcher-portal-v2.png)
 *Researcher Portal — Confidential ZK Access Request & Dataset Proof Submission*
 
-![Anonymous Patient Records](docs/screenshots/anonymous-patient-records.png)
+![Anonymous Patient Records](docs/screenshots/anonymous-patient-records-v2.png)
 *Anonymous Patient Records Explorer — Zero-Knowledge Verified Clinical Cohorts*
 
 ---
@@ -196,15 +196,15 @@ The contract workspace includes a comprehensive unit test suite written with **V
 ## 📷 Platform Screenshots
 
 ### Hospital Dashboard
-![Hospital Dashboard](docs/screenshots/hospital-dashboard.png)
+![Hospital Dashboard](docs/screenshots/hospital-dashboard-v2.png)
 *Deploy new ZK medical exchange smart contracts or join existing on-chain instances using their Midnight addresses.*
 
 ### Researcher Portal
-![Researcher Portal](docs/screenshots/researcher-portal.png)
+![Researcher Portal](docs/screenshots/researcher-portal-v2.png)
 *Submit confidential access requests using private qualification witness credentials and publish immutable dataset access proofs.*
 
 ### Anonymous Patient Records Explorer
-![Anonymous Patient Records](docs/screenshots/anonymous-patient-records.png)
+![Anonymous Patient Records](docs/screenshots/anonymous-patient-records-v2.png)
 *Inspect clinical cohorts protected by Zero-Knowledge verification without compromising patient PII.*
 
 ---
