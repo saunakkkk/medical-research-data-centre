@@ -5,19 +5,6 @@
 
 ---
 
-### 🖼️ Platform Showcase Gallery
-
-![Hospital Dashboard](docs/screenshots/hospital-dashboard-v2.png)
-*Hospital Dashboard — Smart Contract Initialization & Dataset Management*
-
-![Researcher Portal](docs/screenshots/researcher-portal-v2.png)
-*Researcher Portal — Confidential ZK Access Request & Dataset Proof Submission*
-
-![Anonymous Patient Records](docs/screenshots/anonymous-patient-records-v2.png)
-*Anonymous Patient Records Explorer — Zero-Knowledge Verified Clinical Cohorts*
-
----
-
 ## 🏷️ Badges
 
 [![Live Demo](https://img.shields.io/badge/Live_Demo-Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://medical-research-data-centre-64kc-lsfbefyu2-cr-17.vercel.app)
