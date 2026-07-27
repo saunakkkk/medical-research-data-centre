@@ -196,17 +196,17 @@ npm test -w contract
 
 ## 📷 Platform Screenshots
 
-### Hospital Dashboard & Authentic Lace Wallet Authorization
-![Hospital Dashboard](docs/screenshots/hospital-dashboard-v3.png)
-*Deploy new ZK medical exchange smart contracts and authorize dApp connections via the authentic Midnight Lace Wallet browser extension.*
+### ZK Access Proof Submission
+![ZK Access Proof Submission](docs/screenshots/hospital-dashboard-v4.png)
+*Submit Zero-Knowledge dataset access proofs on-chain — private witness credentials are concealed while immutable proof hashes are published to the Midnight ledger.*
 
-### Researcher Portal
-![Researcher Portal](docs/screenshots/researcher-portal-v2.png)
-*Submit confidential access requests using private qualification witness credentials and publish immutable dataset access proofs.*
+### Medical Research Dataset Registry
+![Dataset Registry](docs/screenshots/dataset-registry-v4.png)
+*Browse the on-chain dataset registry with Level-3 ZK-Protected cohorts, GRANTED access status, and full audit proof trails.*
 
-### Anonymous Patient Records Explorer
-![Anonymous Patient Records](docs/screenshots/anonymous-patient-records-v2.png)
-*Inspect clinical cohorts protected by Zero-Knowledge verification without compromising patient PII.*
+### Researcher Portal — ZK Credential Request
+![Researcher Portal](docs/screenshots/researcher-portal-v4.png)
+*Request access to protected research datasets using private medical qualification witnesses verified by the Midnight Knowledge circuit.*
 
 ---
 
