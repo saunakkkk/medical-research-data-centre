@@ -196,9 +196,9 @@ npm test -w contract
 
 ## 📷 Platform Screenshots
 
-### Hospital Dashboard
-![Hospital Dashboard](docs/screenshots/hospital-dashboard-v2.png)
-*Deploy new ZK medical exchange smart contracts or join existing on-chain instances using their Midnight addresses.*
+### Hospital Dashboard & Authentic Lace Wallet Authorization
+![Hospital Dashboard](docs/screenshots/hospital-dashboard-v3.png)
+*Deploy new ZK medical exchange smart contracts and authorize dApp connections via the authentic Midnight Lace Wallet browser extension.*
 
 ### Researcher Portal
 ![Researcher Portal](docs/screenshots/researcher-portal-v2.png)
