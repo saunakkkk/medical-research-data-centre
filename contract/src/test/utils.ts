@@ -10,7 +10,7 @@ export const randomBytes = (length: number): Uint8Array => {
   return bytes;
 };
 
-export const convertFieldToBytes = (len: number, num: bigint, _src?: string): Uint8Array => {
+export const convertFieldToBytes = (len: number, num: bigint): Uint8Array => {
   const arr = new Uint8Array(len);
   let n = num;
   for (let i = len - 1; i >= 0; i--) {

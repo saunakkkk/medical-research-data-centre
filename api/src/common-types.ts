@@ -5,6 +5,7 @@ import { type FoundContract } from '@midnight-ntwrk/midnight-js-contracts';
 import type { State, BBoardPrivateState, Contract, Witnesses } from '../../contract/src/index.js';
 
 export type ContractAddress = string;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Logger = any;
 
 export const bboardPrivateStateKey = 'bboardPrivateState';

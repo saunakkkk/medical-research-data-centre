@@ -81,7 +81,10 @@ export const DataAssetSubmissionDialog: React.FC<DataAssetSubmissionDialogProps>
             <Typography variant="h6" sx={{ fontWeight: 800, color: '#1F2937', lineHeight: 1.2 }}>
               Data Asset Submitted
             </Typography>
-            <Typography variant="caption" sx={{ color: '#059669', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <Typography
+              variant="caption"
+              sx={{ color: '#059669', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 0.5 }}
+            >
               <ShieldIcon sx={{ fontSize: 13 }} /> Midnight Level 3 ZK Access Proof Verified
             </Typography>
           </Box>
@@ -117,14 +120,21 @@ export const DataAssetSubmissionDialog: React.FC<DataAssetSubmissionDialogProps>
               </Typography>
             </Box>
           </Box>
-          <Chip label="ZK-CONFIDENTIAL" size="small" sx={{ backgroundColor: '#F97316', color: '#FFFFFF', fontWeight: 800, fontSize: '0.7rem' }} />
+          <Chip
+            label="ZK-CONFIDENTIAL"
+            size="small"
+            sx={{ backgroundColor: '#F97316', color: '#FFFFFF', fontWeight: 800, fontSize: '0.7rem' }}
+          />
         </Paper>
 
         {/* Technical Detail Grid */}
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           {/* Asset Hash */}
           <Box>
-            <Typography variant="caption" sx={{ color: '#6B7280', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <Typography
+              variant="caption"
+              sx={{ color: '#6B7280', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}
+            >
               Anonymized Record / Asset Hash
             </Typography>
             <Paper
@@ -140,7 +150,10 @@ export const DataAssetSubmissionDialog: React.FC<DataAssetSubmissionDialogProps>
                 justifyContent: 'space-between',
               }}
             >
-              <Typography variant="body2" sx={{ fontFamily: 'monospace', fontWeight: 700, color: '#EA580C', wordBreak: 'break-all' }}>
+              <Typography
+                variant="body2"
+                sx={{ fontFamily: 'monospace', fontWeight: 700, color: '#EA580C', wordBreak: 'break-all' }}
+              >
                 {displayHash}
               </Typography>
               <IconButton size="small" onClick={() => navigator.clipboard.writeText(assetHash)}>
@@ -151,7 +164,10 @@ export const DataAssetSubmissionDialog: React.FC<DataAssetSubmissionDialogProps>
 
           {/* Contract Address */}
           <Box>
-            <Typography variant="caption" sx={{ color: '#6B7280', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <Typography
+              variant="caption"
+              sx={{ color: '#6B7280', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}
+            >
               Midnight Smart Contract Address
             </Typography>
             <Paper
@@ -170,20 +186,35 @@ export const DataAssetSubmissionDialog: React.FC<DataAssetSubmissionDialogProps>
               <Typography variant="body2" sx={{ fontFamily: 'monospace', fontWeight: 600, color: '#374151' }}>
                 {displayAddr}
               </Typography>
-              <Chip label="VERIFIED ON LEDGER" size="small" color="success" variant="outlined" sx={{ fontWeight: 700, fontSize: '0.65rem' }} />
+              <Chip
+                label="VERIFIED ON LEDGER"
+                size="small"
+                color="success"
+                variant="outlined"
+                sx={{ fontWeight: 700, fontSize: '0.65rem' }}
+              />
             </Paper>
           </Box>
 
           <Divider sx={{ my: 0.5 }} />
 
           {/* Zero-Knowledge Witness Status Summary */}
-          <Typography variant="caption" sx={{ color: '#6B7280', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          <Typography
+            variant="caption"
+            sx={{ color: '#6B7280', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}
+          >
             Zero-Knowledge Witness Disclosure Model
           </Typography>
 
           <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1.5 }}>
-            <Paper elevation={0} sx={{ p: 1.5, backgroundColor: '#ECFDF5', border: '1px solid #A7F3D0', borderRadius: 2 }}>
-              <Typography variant="caption" sx={{ color: '#047857', fontWeight: 800, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <Paper
+              elevation={0}
+              sx={{ p: 1.5, backgroundColor: '#ECFDF5', border: '1px solid #A7F3D0', borderRadius: 2 }}
+            >
+              <Typography
+                variant="caption"
+                sx={{ color: '#047857', fontWeight: 800, display: 'flex', alignItems: 'center', gap: 0.5 }}
+              >
                 <LockIcon sx={{ fontSize: 13 }} /> Private Witness Key
               </Typography>
               <Typography variant="body2" sx={{ color: '#065F46', fontWeight: 600, mt: 0.5 }}>
@@ -191,8 +222,14 @@ export const DataAssetSubmissionDialog: React.FC<DataAssetSubmissionDialogProps>
               </Typography>
             </Paper>
 
-            <Paper elevation={0} sx={{ p: 1.5, backgroundColor: '#FFF7ED', border: '1px solid #FFEDD5', borderRadius: 2 }}>
-              <Typography variant="caption" sx={{ color: '#EA580C', fontWeight: 800, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <Paper
+              elevation={0}
+              sx={{ p: 1.5, backgroundColor: '#FFF7ED', border: '1px solid #FFEDD5', borderRadius: 2 }}
+            >
+              <Typography
+                variant="caption"
+                sx={{ color: '#EA580C', fontWeight: 800, display: 'flex', alignItems: 'center', gap: 0.5 }}
+              >
                 <ShieldIcon sx={{ fontSize: 13 }} /> On-Chain Proof Hash
               </Typography>
               <Typography variant="body2" sx={{ color: '#9A3412', fontWeight: 600, mt: 0.5 }}>

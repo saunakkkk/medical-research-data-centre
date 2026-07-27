@@ -13,7 +13,9 @@ import '@midnight-ntwrk/dapp-connector-api';
 import * as pino from 'pino';
 import { DeployedBoardProvider } from './contexts';
 
-const envNetwork = (import.meta.env.VITE_NETWORK_ID || import.meta.env.VITE_NETWORK || 'undeployed').toLowerCase();
+const envNetwork = String(
+  import.meta.env.VITE_NETWORK_ID || import.meta.env.VITE_NETWORK || 'undeployed',
+).toLowerCase();
 const networkId = (envNetwork === 'preprod' ? 'preprod' : 'undeployed') as NetworkId;
 
 // Ensure that the network ID is properly set in Midnight SDK before any wallet/contract calls.

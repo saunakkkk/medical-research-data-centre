@@ -1,12 +1,7 @@
 // Private Medical Research Data Exchange Simulator
 // Copyright (C) Midnight Foundation
 
-import {
-  Contract,
-  Ledger,
-  State,
-  ledger,
-} from "../managed/bboard/contract/index.js";
+import { Contract, Ledger, ledger } from "../managed/bboard/contract/index.js";
 import {
   BBoardPrivateState,
   createBBoardPrivateState,
@@ -14,8 +9,6 @@ import {
 } from "../witnesses.js";
 import {
   CircuitContext,
-  ContractAddress,
-  ContractState,
   CostModel,
   QueryContext,
   sampleContractAddress,
@@ -40,7 +33,9 @@ export class BBoardSimulator {
     );
     const initialContractState = this.contract.initialState({
       initialPrivateState,
-      initialZswapLocalState: emptyZswapLocalState({ bytes: new Uint8Array(32) }),
+      initialZswapLocalState: emptyZswapLocalState({
+        bytes: new Uint8Array(32),
+      }),
     });
     this.circuitContext = {
       currentPrivateState: initialPrivateState,
@@ -89,7 +84,10 @@ export class BBoardSimulator {
     return ledger(this.circuitContext.currentQueryContext.state);
   }
 
-  public grantPermission(datasetId: Uint8Array, researcherPk: Uint8Array): Ledger {
+  public grantPermission(
+    datasetId: Uint8Array,
+    researcherPk: Uint8Array,
+  ): Ledger {
     this.circuitContext = this.contract.impureCircuits.grantPermission(
       this.circuitContext,
       datasetId,
@@ -119,11 +117,8 @@ export class BBoardSimulator {
   }
 
   public publicKey(sequenceBytes?: Uint8Array): Uint8Array {
-    const sequence = sequenceBytes ?? convertFieldToBytes(
-      32,
-      this.getLedger().sequence,
-      "bboard-simulator.ts",
-    );
+    const sequence =
+      sequenceBytes ?? convertFieldToBytes(32, this.getLedger().sequence);
     return this.contract.circuits.publicKey(
       this.circuitContext,
       this.getPrivateState().secretKey,

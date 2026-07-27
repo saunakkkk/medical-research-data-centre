@@ -65,24 +65,22 @@ export class BBoardAPI implements DeployedBBoardAPI {
 
     const indexerState$ = combineLatest(
       [
-        providers.publicDataProvider
-          .contractStateObservable(this.deployedContractAddress, { type: 'latest' })
-          .pipe(
-            map((contractState) => BBoard.ledger(contractState.data)),
-            tap((ledgerState) =>
-              logger?.trace({
-                ledgerStateChanged: {
-                  ledgerState: {
-                    ...ledgerState,
-                    owner: toHex(ledgerState.owner),
-                    activeResearcherPk: toHex(ledgerState.activeResearcherPk),
-                    lastProofHash: toHex(ledgerState.lastProofHash),
-                  },
+        providers.publicDataProvider.contractStateObservable(this.deployedContractAddress, { type: 'latest' }).pipe(
+          map((contractState) => BBoard.ledger(contractState.data)),
+          tap((ledgerState) =>
+            logger?.trace({
+              ledgerStateChanged: {
+                ledgerState: {
+                  ...ledgerState,
+                  owner: toHex(ledgerState.owner),
+                  activeResearcherPk: toHex(ledgerState.activeResearcherPk),
+                  lastProofHash: toHex(ledgerState.lastProofHash),
                 },
-              }),
-            ),
-            catchError(() => of(undefined)),
+              },
+            }),
           ),
+          catchError(() => of(undefined)),
+        ),
         from(providers.privateStateProvider.get(bboardPrivateStateKey) as Promise<BBoardPrivateState>),
       ],
       (ledgerState, privateState) => {
@@ -117,7 +115,11 @@ export class BBoardAPI implements DeployedBBoardAPI {
   readonly deployedContractAddress: ContractAddress;
   readonly state$: Observable<BBoardDerivedState>;
 
-  private async executeTx(callPromise: Promise<any>, actionName: string, stateUpdate?: Partial<BBoardDerivedState>): Promise<void> {
+  private async executeTx(
+    callPromise: Promise<unknown>,
+    actionName: string,
+    stateUpdate?: Partial<BBoardDerivedState>,
+  ): Promise<void> {
     this.logger?.info(`Executing circuit tx: ${actionName}`);
     try {
       const timeoutMs = 12000;
@@ -126,7 +128,7 @@ export class BBoardAPI implements DeployedBBoardAPI {
       if (res && typeof res === 'object' && 'timeout' in res) {
         this.logger?.warn(`${actionName}: indexer confirmation timed out. Updating local state.`);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       this.logger?.warn({ err }, `Circuit call completed or timed out for ${actionName}`);
     }
 
@@ -141,40 +143,28 @@ export class BBoardAPI implements DeployedBBoardAPI {
 
   async registerDataset(title: string): Promise<void> {
     const currentState = this.internalState$.value;
-    await this.executeTx(
-      this.deployedContract.callTx.registerDataset(title),
-      'registerDataset',
-      {
-        datasetTitle: title,
-        datasetCount: currentState.datasetCount + 1n,
-        auditLogCount: currentState.auditLogCount + 1n,
-      },
-    );
+    await this.executeTx(this.deployedContract.callTx.registerDataset(title), 'registerDataset', {
+      datasetTitle: title,
+      datasetCount: currentState.datasetCount + 1n,
+      auditLogCount: currentState.auditLogCount + 1n,
+    });
   }
 
   async requestAccess(datasetId: Uint8Array): Promise<void> {
     const currentState = this.internalState$.value;
-    await this.executeTx(
-      this.deployedContract.callTx.requestAccess(datasetId),
-      'requestAccess',
-      {
-        state: State.REQUESTED,
-        auditLogCount: currentState.auditLogCount + 1n,
-      },
-    );
+    await this.executeTx(this.deployedContract.callTx.requestAccess(datasetId), 'requestAccess', {
+      state: State.REQUESTED,
+      auditLogCount: currentState.auditLogCount + 1n,
+    });
   }
 
   async grantPermission(datasetId: Uint8Array, researcherPk: Uint8Array): Promise<void> {
     const currentState = this.internalState$.value;
-    await this.executeTx(
-      this.deployedContract.callTx.grantPermission(datasetId, researcherPk),
-      'grantPermission',
-      {
-        state: State.GRANTED,
-        activeResearcherPk: researcherPk,
-        auditLogCount: currentState.auditLogCount + 1n,
-      },
-    );
+    await this.executeTx(this.deployedContract.callTx.grantPermission(datasetId, researcherPk), 'grantPermission', {
+      state: State.GRANTED,
+      activeResearcherPk: researcherPk,
+      auditLogCount: currentState.auditLogCount + 1n,
+    });
   }
 
   async submitAccessProof(datasetId: Uint8Array, patientRecordHash: Uint8Array): Promise<void> {
@@ -191,14 +181,10 @@ export class BBoardAPI implements DeployedBBoardAPI {
 
   async revokeAccess(datasetId: Uint8Array): Promise<void> {
     const currentState = this.internalState$.value;
-    await this.executeTx(
-      this.deployedContract.callTx.revokeAccess(datasetId),
-      'revokeAccess',
-      {
-        state: State.REVOKED,
-        auditLogCount: currentState.auditLogCount + 1n,
-      },
-    );
+    await this.executeTx(this.deployedContract.callTx.revokeAccess(datasetId), 'revokeAccess', {
+      state: State.REVOKED,
+      auditLogCount: currentState.auditLogCount + 1n,
+    });
   }
 
   static async deploy(providers: BBoardProviders, logger?: Logger): Promise<BBoardAPI> {

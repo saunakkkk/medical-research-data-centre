@@ -1,7 +1,13 @@
 // Private Medical Research Data Exchange CLI
 
-import { BBoardAPI, type BBoardDerivedState, type BBoardProviders, type DeployedBBoardAPI, bboardPrivateStateKey } from '../../api/src/index.js';
-import { type ContractAddress, type Logger, type PrivateStateId } from '../../api/src/index.js';
+import {
+  BBoardAPI,
+  type BBoardDerivedState,
+  type BBoardProviders,
+  type DeployedBBoardAPI,
+  bboardPrivateStateKey,
+} from '../../api/src/index.js';
+import { type Logger, type PrivateStateId } from '../../api/src/index.js';
 import * as BBoard from '../../contract/src/index.js';
 import { type Config, StandaloneConfig } from './config.js';
 import { createInterface, type Interface } from 'node:readline/promises';
@@ -34,7 +40,7 @@ const deployOrJoin = async (
       return await BBoardAPI.deploy(providers, logger);
     case '2': {
       const contractAddress = await rli.question('Enter existing contract address: ');
-      return await BBoardAPI.join(providers, contractAddress as ContractAddress, logger);
+      return await BBoardAPI.join(providers, contractAddress, logger);
     }
     default:
       logger.error(`Invalid choice: ${choice}`);
@@ -42,11 +48,8 @@ const deployOrJoin = async (
   }
 };
 
-const displayLedgerState = async (
-  providers: BBoardProviders,
-  deployedContract: FoundContract<any>,
-  logger: Logger,
-) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const displayLedgerState = async (providers: BBoardProviders, deployedContract: FoundContract<any>, logger: Logger) => {
   const contractState = await providers.publicDataProvider.queryContractState(
     deployedContract.deployTxData.public.contractAddress,
   );
@@ -62,6 +65,7 @@ const displayLedgerState = async (
   }
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const displayPrivateState = async (providers: BBoardProviders, logger: Logger) => {
   const privateState = await providers.privateStateProvider.get(bboardPrivateStateKey);
   if (privateState === null) {
@@ -131,7 +135,10 @@ const mainLoop = async (providers: BBoardProviders, rli: Interface, logger: Logg
           case '4': {
             const datasetIdHex = await rli.question('Enter Dataset ID hex: ');
             const patientRecordHashHex = await rli.question('Enter Patient Record Hash hex: ');
-            await bboardApi.submitAccessProof(Buffer.from(datasetIdHex, 'hex'), Buffer.from(patientRecordHashHex, 'hex'));
+            await bboardApi.submitAccessProof(
+              Buffer.from(datasetIdHex, 'hex'),
+              Buffer.from(patientRecordHashHex, 'hex'),
+            );
             break;
           }
           case '5': {
@@ -190,6 +197,7 @@ const buildWallet = async (config: Config, rli: Interface, logger: Logger): Prom
   }
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const run = async (config: Config, testEnv: any, logger: Logger): Promise<void> => {
   const rli = createInterface({ input, output, terminal: true });
   const providersToBeStopped: MidnightWalletProvider[] = [];

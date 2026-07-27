@@ -23,7 +23,7 @@ export const Header: React.FC<HeaderProps> = ({ activeTab = 'dashboard', onTabCh
   const [walletConnected, setWalletConnected] = useState(false);
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
 
-  const networkEnv = (import.meta.env.VITE_NETWORK || 'undeployed').toUpperCase();
+  const networkEnv = String(import.meta.env.VITE_NETWORK || 'undeployed').toUpperCase();
 
   const handleWalletToggle = () => {
     if (walletConnected) {
@@ -77,11 +77,18 @@ export const Header: React.FC<HeaderProps> = ({ activeTab = 'dashboard', onTabCh
             <ShieldIcon sx={{ color: '#F97316', fontSize: 26 }} />
           </Box>
           <Box>
-            <Typography variant="h6" sx={{ fontWeight: 800, color: '#EA580C', letterSpacing: '-0.02em', fontSize: '1.25rem' }}>
+            <Typography
+              variant="h6"
+              sx={{ fontWeight: 800, color: '#EA580C', letterSpacing: '-0.02em', fontSize: '1.25rem' }}
+            >
               Private Medical Research Data Exchange
             </Typography>
-            <Typography variant="caption" sx={{ color: '#6B7280', display: 'flex', alignItems: 'center', gap: 0.5, fontWeight: 500 }}>
-              <LockIcon sx={{ fontSize: 13, color: '#10B981' }} /> Midnight ZK Confidential Credentials & Dataset Access Proofs
+            <Typography
+              variant="caption"
+              sx={{ color: '#6B7280', display: 'flex', alignItems: 'center', gap: 0.5, fontWeight: 500 }}
+            >
+              <LockIcon sx={{ fontSize: 13, color: '#10B981' }} /> Midnight ZK Confidential Credentials & Dataset Access
+              Proofs
             </Typography>
           </Box>
         </Box>

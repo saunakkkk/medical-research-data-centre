@@ -63,6 +63,7 @@ let _isFallbackMode = false;
 
 class MockBBoardAPI implements DeployedBBoardAPI {
   readonly deployedContractAddress: ContractAddress;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
   readonly deployedContract: any = {} as any;
   private readonly _state$: RxBehaviorSubject<BBoardDerivedState>;
   readonly state$: RxObservable<BBoardDerivedState>;
@@ -87,26 +88,31 @@ class MockBBoardAPI implements DeployedBBoardAPI {
   }
 
   async registerDataset(title: string): Promise<void> {
+    await Promise.resolve();
     const s = this._state$.value;
     this._update({ datasetTitle: title, datasetCount: s.datasetCount + 1n, auditLogCount: s.auditLogCount + 1n });
   }
 
   async requestAccess(_datasetId: Uint8Array): Promise<void> {
+    await Promise.resolve();
     const s = this._state$.value;
     this._update({ state: State.REQUESTED, auditLogCount: s.auditLogCount + 1n });
   }
 
   async grantPermission(_datasetId: Uint8Array, researcherPk: Uint8Array): Promise<void> {
+    await Promise.resolve();
     const s = this._state$.value;
     this._update({ state: State.GRANTED, activeResearcherPk: researcherPk, auditLogCount: s.auditLogCount + 1n });
   }
 
   async submitAccessProof(_datasetId: Uint8Array, patientRecordHash: Uint8Array): Promise<void> {
+    await Promise.resolve();
     const s = this._state$.value;
     this._update({ lastProofHash: patientRecordHash, auditLogCount: s.auditLogCount + 1n });
   }
 
   async revokeAccess(_datasetId: Uint8Array): Promise<void> {
+    await Promise.resolve();
     const s = this._state$.value;
     this._update({ state: State.REVOKED, auditLogCount: s.auditLogCount + 1n });
   }
@@ -243,7 +249,7 @@ export class BrowserDeployedBoardManager implements DeployedBoardAPIProvider {
       await this.getProviders();
       // Now check: on undeployed network or missing wallet, use instant mock
       if (_isFallbackMode) {
-        const mockAddr = toHex(new Uint8Array(32).fill(0xab)) as ContractAddress;
+        const mockAddr = toHex(new Uint8Array(32).fill(0xab));
         deployment.next({ status: 'deployed', api: new MockBBoardAPI(mockAddr) });
         return;
       }
@@ -251,7 +257,7 @@ export class BrowserDeployedBoardManager implements DeployedBoardAPIProvider {
       const api = await Promise.race([
         BBoardAPI.deploy(providers, this.logger),
         new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error('Deploy timed out after 25 s — is the proof server running?')), 25_000)
+          setTimeout(() => reject(new Error('Deploy timed out after 25 s — is the proof server running?')), 25_000),
         ),
       ]);
       deployment.next({ status: 'deployed', api });
@@ -277,9 +283,7 @@ export class BrowserDeployedBoardManager implements DeployedBoardAPIProvider {
       const providers = await this.getProviders();
       const api = await Promise.race([
         BBoardAPI.join(providers, contractAddress, this.logger),
-        new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error('Join timed out after 25 s')), 25_000)
-        ),
+        new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Join timed out after 25 s')), 25_000)),
       ]);
       deployment.next({ status: 'deployed', api });
     } catch (error: unknown) {
@@ -293,7 +297,9 @@ export class BrowserDeployedBoardManager implements DeployedBoardAPIProvider {
 
 /** @internal */
 const initializeProviders = async (logger: Logger): Promise<BBoardProviders> => {
-  const envNetwork = (import.meta.env.VITE_NETWORK_ID || import.meta.env.VITE_NETWORK || 'undeployed').toLowerCase();
+  const envNetwork = String(
+    import.meta.env.VITE_NETWORK_ID || import.meta.env.VITE_NETWORK || 'undeployed',
+  ).toLowerCase();
   const networkId = (envNetwork === 'preprod' ? 'preprod' : 'undeployed') as NetworkId;
   setNetworkId(networkId);
 
@@ -355,8 +361,10 @@ const initializeProviders = async (logger: Logger): Promise<BBoardProviders> => 
     // Signal MockBBoardAPI path — deploy/join will skip proof server entirely
     _isFallbackMode = true;
     const proofServerUrl = (import.meta.env.VITE_PROOF_SERVER_URL as string) || 'http://localhost:6300';
-    const indexerUrl = (import.meta.env.VITE_INDEXER_URL as string) || 'https://indexer.preprod.midnight.network/api/v4/graphql';
-    const indexerWsUrl = (import.meta.env.VITE_INDEXER_WS_URL as string) || 'wss://indexer.preprod.midnight.network/api/v4/graphql/ws';
+    const indexerUrl =
+      (import.meta.env.VITE_INDEXER_URL as string) || 'https://indexer.preprod.midnight.network/api/v4/graphql';
+    const indexerWsUrl =
+      (import.meta.env.VITE_INDEXER_WS_URL as string) || 'wss://indexer.preprod.midnight.network/api/v4/graphql/ws';
 
     const mockCoinPublicKey = toHex(new Uint8Array(32).fill(1));
     const mockEncPublicKey = toHex(new Uint8Array(32).fill(2));
@@ -374,11 +382,13 @@ const initializeProviders = async (logger: Logger): Promise<BBoardProviders> => 
           return mockEncPublicKey;
         },
         balanceTx: async (tx: UnboundTransaction): Promise<FinalizedTransaction> => {
+          await Promise.resolve();
           return tx as unknown as FinalizedTransaction;
         },
       },
       midnightProvider: {
         submitTx: async (tx: FinalizedTransaction): Promise<TransactionId> => {
+          await Promise.resolve();
           const ids = tx.identifiers ? tx.identifiers() : [toHex(new Uint8Array(32).fill(7))];
           return ids[0] || toHex(new Uint8Array(32).fill(7));
         },
