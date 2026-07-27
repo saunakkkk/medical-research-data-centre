@@ -18,6 +18,17 @@
 [![Vite](https://img.shields.io/badge/Vite-8.0-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
 [![Zero Knowledge](https://img.shields.io/badge/Zero_Knowledge-Midnight_Compact-8A2BE2?style=for-the-badge)](https://midnight.network)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
+[![Demo Video](https://img.shields.io/badge/Demo_Video-YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://youtu.be/nWliyzCuZPk)
+
+---
+
+## 🎥 Demo Video
+
+**Watch the complete project demonstration on YouTube:**
+
+[![Watch Demo](https://img.shields.io/badge/▶_Watch_Full_Demo-YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://youtu.be/nWliyzCuZPk)
+
+https://youtu.be/nWliyzCuZPk
 
 ---
 
@@ -27,7 +38,7 @@
 | :--- | :--- | :--- |
 | 🌐 **Live Application** | Deployed web application on Vercel | [Live Demo](https://medical-research-data-centre-64kc-lsfbefyu2-cr-17.vercel.app) |
 | 📦 **GitHub Repository** | Open-source monorepo codebase | [GitHub Repo](https://github.com/saunakkkk/medical-research-data-centre) |
-| 🎥 **Demo Video** | Interactive application walkthrough | [Watch Demo Video](TODO: Add Demo Video Link) |
+| 🎥 **Demo Video** | Interactive application walkthrough | [Watch Demo Video](https://youtu.be/nWliyzCuZPk) |
 | ⚙️ **CI/CD Workflow** | GitHub Actions build & verification pipeline | [View CI/CD Pipeline](https://github.com/saunakkkk/medical-research-data-centre/actions) |
 | 🔍 **Smart Contract Explorer** | Midnight Preprod Network Explorer | [Midnight Explorer](https://preprod.midnight-explorer.com) |
 | 📄 **Midnight Documentation** | Official Midnight dApp development guide | [Midnight Docs](https://docs.midnight.network) |
