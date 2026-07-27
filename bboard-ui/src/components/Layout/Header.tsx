@@ -1,10 +1,11 @@
 // Private Medical Research Data Exchange Premium Header & Navigation
 
-import React from 'react';
-import { AppBar, Box, Typography, Button, Chip } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { AppBar, Box, Typography, Button, Chip, Snackbar, Alert, CircularProgress } from '@mui/material';
 import LockIcon from '@mui/icons-material/Lock';
 import ShieldIcon from '@mui/icons-material/Security';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import SchoolIcon from '@mui/icons-material/School';
 import StorageIcon from '@mui/icons-material/Storage';
@@ -12,14 +13,101 @@ import VpnKeyIcon from '@mui/icons-material/VpnKey';
 import HistoryIcon from '@mui/icons-material/History';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import type { InitialAPI, ConnectedAPI } from '@midnight-ntwrk/dapp-connector-api';
 
 interface HeaderProps {
   activeTab?: string;
   onTabChange?: (tab: string) => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ activeTab = 'dashboard', onTabChange }) => {
+const getMidnightWallet = (): InitialAPI | undefined => {
+  if (typeof window === 'undefined' || !window.midnight) return undefined;
+  if (window.midnight['mnLace'] && typeof window.midnight['mnLace'].connect === 'function') {
+    return window.midnight['mnLace'];
+  }
+  return Object.values(window.midnight).find(
+    (wallet): wallet is InitialAPI =>
+      !!wallet && typeof wallet === 'object' && typeof wallet.connect === 'function',
+  );
+};
 
+const truncateAddress = (addr: string): string => {
+  if (!addr || addr.length <= 16) return addr;
+  return `${addr.slice(0, 10)}...${addr.slice(-6)}`;
+};
+
+export const Header: React.FC<HeaderProps> = ({ activeTab = 'dashboard', onTabChange }) => {
+  const [connecting, setConnecting] = useState(false);
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
+  const [, setConnectedApi] = useState<ConnectedAPI | null>(null);
+  const [alertMessage, setAlertMessage] = useState<string | null>(null);
+  const [alertSeverity, setAlertSeverity] = useState<'error' | 'warning' | 'info' | 'success'>('info');
+
+  const envNetwork = String(
+    import.meta.env.VITE_NETWORK_ID || import.meta.env.VITE_NETWORK || 'preprod',
+  ).toUpperCase();
+
+  useEffect(() => {
+    // Check if wallet is already connected or available on mount
+    const wallet = getMidnightWallet();
+    if (wallet) {
+      console.log('Midnight Lace wallet extension detected:', wallet.name, wallet.apiVersion);
+    }
+  }, []);
+
+  const handleConnectWallet = async () => {
+    if (walletAddress) {
+      setWalletAddress(null);
+      setConnectedApi(null);
+      setAlertMessage('Wallet disconnected.');
+      setAlertSeverity('info');
+      return;
+    }
+
+    const wallet = getMidnightWallet();
+    if (!wallet) {
+      setAlertMessage(
+        'Midnight Lace Wallet browser extension not detected. Please install or enable the Midnight Lace Wallet extension.',
+      );
+      setAlertSeverity('warning');
+      return;
+    }
+
+    try {
+      setConnecting(true);
+      setAlertMessage(null);
+
+      const networkId = envNetwork.toLowerCase() === 'preprod' ? 'preprod' : 'undeployed';
+
+      // Triggers authentic browser wallet authorization popup
+      const connected = await wallet.connect(networkId);
+      setConnectedApi(connected);
+
+      let address = '';
+      try {
+        const shielded = await connected.getShieldedAddresses();
+        address = shielded.shieldedAddress;
+      } catch {
+        try {
+          const unshielded = await connected.getUnshieldedAddress();
+          address = unshielded.unshieldedAddress;
+        } catch {
+          address = 'Connected';
+        }
+      }
+
+      setWalletAddress(address);
+      setAlertMessage(`Connected to Midnight Lace Wallet (${truncateAddress(address)})`);
+      setAlertSeverity('success');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('Midnight Lace wallet connection error:', err);
+      setAlertMessage(`Wallet connection failed: ${msg}`);
+      setAlertSeverity('error');
+    } finally {
+      setConnecting(false);
+    }
+  };
 
   const navItems = [
     { id: 'dashboard', label: 'Hospital Dashboard', icon: <LocalHospitalIcon fontSize="small" /> },
@@ -82,39 +170,70 @@ export const Header: React.FC<HeaderProps> = ({ activeTab = 'dashboard', onTabCh
         {/* Network & Wallet Controls */}
         <Box sx={{ display: 'flex', flexDirection: 'row', gap: 1.5, alignItems: 'center' }}>
           <Chip
-            label="Midnight Demo"
+            label={`Network: ${envNetwork}`}
             size="small"
-            icon={<ShieldIcon sx={{ fontSize: '14px !important', color: '#6366F1 !important' }} />}
+            icon={<ShieldIcon sx={{ fontSize: '14px !important', color: '#EA580C !important' }} />}
             sx={{
-              backgroundColor: '#EEF2FF',
-              color: '#4F46E5',
-              border: '1px solid #C7D2FE',
+              backgroundColor: '#FFF7ED',
+              color: '#EA580C',
+              border: '1px solid #FFEDD5',
               fontWeight: 700,
               fontSize: '0.75rem',
             }}
           />
-          <Button
-            variant="outlined"
-            size="small"
-            disabled
-            startIcon={<AccountBalanceWalletIcon />}
-            sx={{
-              borderColor: '#D1D5DB',
-              color: '#9CA3AF',
-              backgroundColor: '#F9FAFB',
-              fontWeight: 600,
-              py: 0.8,
-              px: 2,
-              cursor: 'not-allowed',
-              '&.Mui-disabled': {
-                borderColor: '#D1D5DB',
-                color: '#9CA3AF',
-                backgroundColor: '#F9FAFB',
-              },
-            }}
-          >
-            Midnight Wallet (Demo Build)
-          </Button>
+
+          {connecting ? (
+            <Button
+              variant="contained"
+              size="small"
+              disabled
+              startIcon={<CircularProgress size={16} color="inherit" />}
+              sx={{
+                backgroundColor: '#F97316',
+                color: '#FFFFFF',
+                fontWeight: 700,
+                py: 0.8,
+                px: 2.5,
+              }}
+            >
+              Connecting...
+            </Button>
+          ) : walletAddress ? (
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={handleConnectWallet}
+              startIcon={<CheckCircleIcon sx={{ color: '#10B981' }} />}
+              sx={{
+                borderColor: '#10B981',
+                color: '#059669',
+                backgroundColor: '#ECFDF5',
+                '&:hover': { borderColor: '#059669', backgroundColor: '#D1FAE5' },
+                py: 0.8,
+                px: 2,
+                fontWeight: 700,
+              }}
+            >
+              Lace ({truncateAddress(walletAddress)})
+            </Button>
+          ) : (
+            <Button
+              variant="contained"
+              size="small"
+              onClick={handleConnectWallet}
+              startIcon={<AccountBalanceWalletIcon />}
+              sx={{
+                backgroundColor: '#F97316',
+                color: '#FFFFFF',
+                fontWeight: 700,
+                py: 0.8,
+                px: 2.5,
+                '&:hover': { backgroundColor: '#EA580C' },
+              }}
+            >
+              Connect Lace Wallet
+            </Button>
+          )}
         </Box>
       </Box>
 
@@ -165,6 +284,18 @@ export const Header: React.FC<HeaderProps> = ({ activeTab = 'dashboard', onTabCh
           );
         })}
       </Box>
+
+      {/* Snackbar feedback message */}
+      <Snackbar
+        open={!!alertMessage}
+        autoHideDuration={6000}
+        onClose={() => setAlertMessage(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert onClose={() => setAlertMessage(null)} severity={alertSeverity} sx={{ width: '100%' }}>
+          {alertMessage}
+        </Alert>
+      </Snackbar>
     </AppBar>
   );
 };
