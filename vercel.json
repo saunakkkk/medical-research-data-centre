@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "cd bboard-ui && npm run build:vercel",
+  "buildCommand": "npm run build -w contract && npm run build:vercel -w bboard-ui",
   "outputDirectory": "bboard-ui/dist",
   "installCommand": "npm ci --legacy-peer-deps",
   "framework": null,

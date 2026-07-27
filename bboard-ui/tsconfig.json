@@ -15,7 +15,11 @@
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "esModuleInterop": false,
     "noEmit": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "paths": {
+      "@midnight-ntwrk/bboard-contract": ["../contract/src/index.ts"],
+      "@midnight-ntwrk/bboard-contract/*": ["../contract/src/*"]
+    }
   },
   "include": ["src", "eslint.config.mjs"]
 }
